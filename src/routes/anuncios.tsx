@@ -2,7 +2,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
+import { Menu, Mail, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/anuncios")({
   head: () => ({
@@ -60,10 +60,15 @@ export function PublicHeader() {
 export function PublicFooter() {
   return (
     <footer className="border-t bg-muted/30">
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:grid-cols-2 md:grid-cols-4">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 md:grid-cols-4">
         <div>
           <BrandLogo size={28} />
           <p className="mt-2 text-xs text-muted-foreground">Direto entre proprietários e inquilinos.</p>
+          <div className="mt-4 space-y-0.5 text-[11px] leading-relaxed text-muted-foreground/70">
+            <p>CNPJ: 63.266.334/0001-21</p>
+            <p>Rua das Seriemas, 345 - Bairro: Villa Mariana</p>
+            <p>Cáceres-MT | CEP: 78.210-414</p>
+          </div>
         </div>
         <div>
           <p className="text-sm font-semibold">Navegar</p>
@@ -81,14 +86,31 @@ export function PublicFooter() {
         </div>
         <div>
           <p className="text-sm font-semibold">Contato</p>
-          <p className="mt-2 text-sm text-muted-foreground">contato@alugaflow.com.br</p>
-          <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-            <p><Link to="/privacidade">Política de Privacidade</Link></p>
-            <p><Link to="/termos">Termos de Uso</Link></p>
+          <a
+            href="mailto:contato@alugaflow.com.br"
+            className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <Mail className="h-3.5 w-3.5" /> contato@alugaflow.com.br
+          </a>
+          <a
+            href="https://wa.me/5565993025105"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-2 rounded-md bg-[#25D366] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1ebe5b]"
+          >
+            <MessageCircle className="h-4 w-4" /> Suporte via WhatsApp
+          </a>
+        </div>
+      </div>
+      <div className="border-t">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:justify-between">
+          <p>© 2026 AlugaFlow. Todos os direitos reservados.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacidade" className="hover:text-foreground">Política de Privacidade</Link>
+            <Link to="/termos" className="hover:text-foreground">Termos de Uso</Link>
           </div>
         </div>
       </div>
-      <div className="border-t py-4 text-center text-xs text-muted-foreground">© 2026 AlugaFlow. Todos os direitos reservados.</div>
     </footer>
   );
 }
