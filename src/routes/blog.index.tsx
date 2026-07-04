@@ -5,6 +5,7 @@ import { PublicFooter, PublicHeader } from "./anuncios";
 import { formatDateBR, readingTime } from "@/lib/blog-utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AdSenseBlock } from "@/components/adsense-block";
 
 export const Route = createFileRoute("/blog/")({
   head: () => ({
@@ -59,6 +60,8 @@ function BlogIndex() {
             ))}
           </div>
         )}
+        <AdSenseBlock />
+
         {pages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Anterior</Button>

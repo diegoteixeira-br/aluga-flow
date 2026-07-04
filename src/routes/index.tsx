@@ -8,6 +8,7 @@ import { formatDateBR } from "@/lib/blog-utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
+import { AdSenseBlock } from "@/components/adsense-block";
 
 
 export const Route = createFileRoute("/")({
@@ -40,6 +41,9 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <PublicHeader />
       <PublicListings variant="home" />
+
+      <div className="mx-auto max-w-6xl px-4"><AdSenseBlock /></div>
+
 
       <section className="border-t bg-gradient-to-br from-primary/10 via-background to-background py-12">
         <div className="mx-auto max-w-4xl px-4 text-center">

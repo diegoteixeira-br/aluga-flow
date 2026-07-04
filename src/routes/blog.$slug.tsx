@@ -5,6 +5,7 @@ import { formatDateBR, readingTime, renderContent } from "@/lib/blog-utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Share2, Link as LinkIcon } from "lucide-react";
+import { AdSenseBlock } from "@/components/adsense-block";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
@@ -91,6 +92,9 @@ function PostPage() {
           <img src={post.cover_image_url} alt={post.title} className="mt-6 aspect-[16/9] w-full rounded-lg object-cover" />
         )}
         <div className="prose prose-neutral mt-6 max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: renderContent(post.content) }} />
+
+        <AdSenseBlock />
+
 
         <div className="mt-8 flex flex-wrap gap-2 border-t pt-6">
           <Button variant="outline" size="sm" onClick={share}><Share2 className="mr-2 h-4 w-4" /> WhatsApp</Button>
