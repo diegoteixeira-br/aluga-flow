@@ -8,6 +8,7 @@ import { formatDateBR } from "@/lib/blog-utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
+import { AdSenseBlock } from "@/components/adsense-block";
 
 
 export const Route = createFileRoute("/")({
