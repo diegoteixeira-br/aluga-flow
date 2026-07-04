@@ -2,7 +2,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { Menu, Mail, MessageCircle } from "lucide-react";
+import { Menu, Mail } from "lucide-react";
 
 export const Route = createFileRoute("/anuncios")({
   head: () => ({
@@ -92,15 +92,8 @@ export function PublicFooter() {
           >
             <Mail className="h-3.5 w-3.5" /> contato@alugaflow.com.br
           </a>
-          <a
-            href="https://wa.me/5565993025105"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-2 rounded-md bg-[#25D366] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1ebe5b]"
-          >
-            <MessageCircle className="h-4 w-4" /> Suporte via WhatsApp
-          </a>
         </div>
+
       </div>
       <div className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:justify-between">
