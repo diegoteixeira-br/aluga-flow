@@ -90,6 +90,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fmifbxrqbwkyjgkgceyh.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://fmifbxrqbwkyjgkgceyh.supabase.co" },
+      { rel: "preconnect", href: "https://pagead2.googlesyndication.com", crossOrigin: "anonymous" },
+    ],
+    scripts: [
+      {
+        async: true,
+        src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2189440969245752",
+        crossOrigin: "anonymous",
+      },
     ],
   }),
   shellComponent: RootShell,
