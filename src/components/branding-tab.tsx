@@ -95,7 +95,7 @@ export function BrandingTab() {
     mutationFn: async (kind: "logo" | "watermark") => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Sem sessão");
-
+      
       const path = kind === "logo" ? profile?.logo_url : profile?.watermark_url;
       if (path) await supabase.storage.from("branding").remove([path]);
       const patch = (kind === "logo" ? { logo_url: null } : { watermark_url: null }) as never;
@@ -134,25 +134,16 @@ export function BrandingTab() {
       <CardHeader>
         <CardTitle>Identidade visual</CardTitle>
         <CardDescription>
-          Configure logotipo, marca d'água, cabeçalho e rodapé. Esses elementos aparecem nos PDFs de
-          contratos, recibos e documentos exportados.
+          Configure logotipo, marca d'água, cabeçalho e rodapé. Esses elementos aparecem nos PDFs de contratos, recibos e
+          documentos exportados.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="logo" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="logo">
-              <ImageIcon className="h-4 w-4" />
-              Logotipo
-            </TabsTrigger>
-            <TabsTrigger value="contratos">
-              <FileText className="h-4 w-4" />
-              Contratos
-            </TabsTrigger>
-            <TabsTrigger value="documentos">
-              <Files className="h-4 w-4" />
-              Documentos
-            </TabsTrigger>
+            <TabsTrigger value="logo"><ImageIcon className="h-4 w-4" />Logotipo</TabsTrigger>
+            <TabsTrigger value="contratos"><FileText className="h-4 w-4" />Contratos</TabsTrigger>
+            <TabsTrigger value="documentos"><Files className="h-4 w-4" />Documentos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="logo">
@@ -182,10 +173,7 @@ export function BrandingTab() {
                 rows={3}
                 placeholder="Exibido em largura total no topo de cada página."
                 value={header}
-                onChange={(e) => {
-                  setHeader(e.target.value);
-                  setDirty(true);
-                }}
+                onChange={(e) => { setHeader(e.target.value); setDirty(true); }}
               />
             </div>
 
@@ -195,10 +183,7 @@ export function BrandingTab() {
                 rows={3}
                 placeholder="Exibido no canto inferior esquerdo. A numeração de páginas fica à direita."
                 value={footer}
-                onChange={(e) => {
-                  setFooter(e.target.value);
-                  setDirty(true);
-                }}
+                onChange={(e) => { setFooter(e.target.value); setDirty(true); }}
               />
             </div>
 
@@ -206,11 +191,7 @@ export function BrandingTab() {
               <p className="text-sm text-muted-foreground">
                 {dirty ? "Você tem alterações não salvas." : "Todas as alterações estão salvas."}
               </p>
-              <Button
-                type="button"
-                onClick={() => saveText.mutate()}
-                disabled={!dirty || saveText.isPending}
-              >
+              <Button type="button" onClick={() => saveText.mutate()} disabled={!dirty || saveText.isPending}>
                 {saveText.isPending ? "Salvando..." : "Salvar alterações"}
               </Button>
             </div>
@@ -218,9 +199,8 @@ export function BrandingTab() {
 
           <TabsContent value="documentos">
             <p className="text-sm text-muted-foreground">
-              Os mesmos cabeçalho, rodapé e marca d'água configurados na aba{" "}
-              <strong>Contratos</strong> são aplicados aos demais documentos (faturas, recibos e
-              vistorias) exportados em PDF.
+              Os mesmos cabeçalho, rodapé e marca d'água configurados na aba <strong>Contratos</strong> são aplicados aos
+              demais documentos (faturas, recibos e vistorias) exportados em PDF.
             </p>
           </TabsContent>
         </Tabs>
@@ -230,12 +210,7 @@ export function BrandingTab() {
 }
 
 function UploadSlot({
-  title,
-  description,
-  previewUrl,
-  onUpload,
-  onRemove,
-  uploading,
+  title, description, previewUrl, onUpload, onRemove, uploading,
 }: {
   title: string;
   description: string;
@@ -268,8 +243,7 @@ function UploadSlot({
           </label>
           {onRemove ? (
             <Button type="button" variant="outline" size="sm" onClick={onRemove}>
-              <Trash2 className="h-4 w-4" />
-              Remover
+              <Trash2 className="h-4 w-4" />Remover
             </Button>
           ) : null}
         </div>

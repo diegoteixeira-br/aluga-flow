@@ -16,15 +16,12 @@ async function invokeSignatures<T>(body: Record<string, unknown>): Promise<T> {
   if (error) {
     let msg = error.message || "Falha ao chamar contract-signatures";
     try {
-      const ctx = (error as unknown as { context?: { json?: () => Promise<{ error?: string }> } })
-        .context;
+      const ctx = (error as unknown as { context?: { json?: () => Promise<{ error?: string }> } }).context;
       if (ctx && typeof ctx.json === "function") {
         const j = await ctx.json();
         if (j?.error) msg = j.error;
       }
-    } catch {
-      /* noop */
-    }
+    } catch { /* noop */ }
     throw new Error(msg);
   }
   if (data && typeof data === "object" && "error" in data && (data as { error?: string }).error) {
@@ -33,9 +30,7 @@ async function invokeSignatures<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export async function createSignatureInvites(args: {
-  data: { contractId: string; signers: SignerInput[] };
-}) {
+export async function createSignatureInvites(args: { data: { contractId: string; signers: SignerInput[] } }) {
   return invokeSignatures<{ signatures: SignatureRow[] }>({
     action: "create",
     contractId: args.data.contractId,

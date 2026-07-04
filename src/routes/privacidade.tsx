@@ -8,11 +8,7 @@ export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
       { title: "Política de Privacidade — AlugaFlow" },
-      {
-        name: "description",
-        content:
-          "Política de Privacidade do AlugaFlow em conformidade com a LGPD (Lei nº 13.709/2018).",
-      },
+      { name: "description", content: "Política de Privacidade do AlugaFlow em conformidade com a LGPD (Lei nº 13.709/2018)." },
     ],
   }),
   component: PrivacidadePage,
@@ -25,11 +21,7 @@ function PrivacidadePage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("legal_pages")
-        .select("content, updated_at")
-        .eq("slug", "privacidade")
-        .maybeSingle();
+      const { data } = await supabase.from("legal_pages").select("content, updated_at").eq("slug", "privacidade").maybeSingle();
       setContent(data?.content ?? "");
       setUpdatedAt(data?.updated_at ?? null);
       setLoading(false);
@@ -40,12 +32,8 @@ function PrivacidadePage() {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <Link to="/">
-            <BrandLogo size={32} />
-          </Link>
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-            ← Voltar
-          </Link>
+          <Link to="/"><BrandLogo size={32} /></Link>
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← Voltar</Link>
         </div>
       </header>
 
@@ -58,9 +46,7 @@ function PrivacidadePage() {
         )}
 
         {loading ? (
-          <div className="py-10 text-center">
-            <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
+          <div className="py-10 text-center"><Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" /></div>
         ) : (
           <div
             className="prose prose-sm mt-8 max-w-none space-y-6 text-sm leading-relaxed text-foreground"

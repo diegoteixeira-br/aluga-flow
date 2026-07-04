@@ -79,15 +79,8 @@ function qualificacaoProprietario(o: OwnerProfile): string {
   if (o.full_name) partes.push(o.full_name);
   if (o.cpf) partes.push(`inscrito(a) no CPF nº ${o.cpf}`);
   if (o.rg) partes.push(`RG nº ${o.rg}`);
-  const end = [
-    o.address_street,
-    o.address_number,
-    o.address_neighborhood,
-    o.address_city,
-    o.address_uf,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const end = [o.address_street, o.address_number, o.address_neighborhood, o.address_city, o.address_uf]
+    .filter(Boolean).join(", ");
   if (end) partes.push(`residente em ${end}`);
   if (o.email) partes.push(`e-mail ${o.email}`);
   if (o.phone) partes.push(`telefone ${o.phone}`);
@@ -100,15 +93,8 @@ function qualificacaoInquilino(t: ContractPDFData["tenant"]): string {
   if (t.full_name) partes.push(t.full_name);
   if (t.cpf) partes.push(`CPF nº ${t.cpf}`);
   if (t.rg) partes.push(`RG nº ${t.rg}`);
-  const end = [
-    t.address_street,
-    t.address_number,
-    t.address_neighborhood,
-    t.address_city,
-    t.address_state,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const end = [t.address_street, t.address_number, t.address_neighborhood, t.address_city, t.address_state]
+    .filter(Boolean).join(", ");
   if (end) partes.push(`residente em ${end}`);
   if (t.email) partes.push(`e-mail ${t.email}`);
   if (t.phone) partes.push(`telefone ${t.phone}`);
@@ -128,10 +114,8 @@ function qualificacaoFiador(g: NonNullable<ContractPDFData["guarantor"]>): strin
 
 const ADJ_LABEL: Record<string, string> = { nenhum: "Nenhum", igpm: "IGP-M", ipca: "IPCA" };
 const GUAR_LABEL: Record<string, string> = {
-  sem_garantia: "Sem garantia",
-  fiador: "Fiador",
-  caucao: "Caução em dinheiro",
-  seguro_fianca: "Seguro fiança",
+  sem_garantia: "Sem garantia", fiador: "Fiador",
+  caucao: "Caução em dinheiro", seguro_fianca: "Seguro fiança",
 };
 
 export function buildTokenValues(
@@ -139,21 +123,13 @@ export function buildTokenValues(
   owner: OwnerProfile,
   signDateISO?: string,
 ): Record<string, string> {
-  const enderecoImovel = [c.property?.address, c.property?.city, c.property?.state]
-    .filter(Boolean)
-    .join(", ");
-  const caucaoValor =
-    c.guarantee_type === "caucao" && c.guarantee_months && c.rent_amount
-      ? c.guarantee_months * c.rent_amount
-      : 0;
+  const enderecoImovel = [c.property?.address, c.property?.city, c.property?.state].filter(Boolean).join(", ");
+  const caucaoValor = c.guarantee_type === "caucao" && c.guarantee_months && c.rent_amount
+    ? c.guarantee_months * c.rent_amount : 0;
   const hoje = signDateISO ?? new Date().toISOString().slice(0, 10);
   return {
     data_assinatura: formatDate(hoje),
-    data_hoje_extenso: new Date(hoje + "T00:00:00").toLocaleDateString("pt-BR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }),
+    data_hoje_extenso: new Date(hoje + "T00:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }),
 
     proprietario_nome: owner.full_name ?? "",
     proprietario_razao_social: owner.full_name ?? "",
@@ -161,15 +137,7 @@ export function buildTokenValues(
     proprietario_rg: owner.rg ?? "",
     proprietario_email: owner.email ?? "",
     proprietario_telefone: owner.phone ?? "",
-    proprietario_endereco: [
-      owner.address_street,
-      owner.address_number,
-      owner.address_neighborhood,
-      owner.address_city,
-      owner.address_uf,
-    ]
-      .filter(Boolean)
-      .join(", "),
+    proprietario_endereco: [owner.address_street, owner.address_number, owner.address_neighborhood, owner.address_city, owner.address_uf].filter(Boolean).join(", "),
     proprietario_qualificacao: qualificacaoProprietario(owner),
 
     contratante_nome: c.tenant?.full_name ?? "",
@@ -177,15 +145,7 @@ export function buildTokenValues(
     contratante_rg: c.tenant?.rg ?? "",
     contratante_email: c.tenant?.email ?? "",
     contratante_telefone: c.tenant?.phone ?? "",
-    contratante_endereco: [
-      c.tenant?.address_street,
-      c.tenant?.address_number,
-      c.tenant?.address_neighborhood,
-      c.tenant?.address_city,
-      c.tenant?.address_state,
-    ]
-      .filter(Boolean)
-      .join(", "),
+    contratante_endereco: [c.tenant?.address_street, c.tenant?.address_number, c.tenant?.address_neighborhood, c.tenant?.address_city, c.tenant?.address_state].filter(Boolean).join(", "),
     contratante_qualificacao: qualificacaoInquilino(c.tenant),
 
     garantia_tipo: GUAR_LABEL[c.guarantee_type] ?? c.guarantee_type,
@@ -209,8 +169,7 @@ export function buildTokenValues(
 }
 
 function monthsBetween(s: string, e: string): number {
-  const a = new Date(s + "T00:00:00"),
-    b = new Date(e + "T00:00:00");
+  const a = new Date(s + "T00:00:00"), b = new Date(e + "T00:00:00");
   if (isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
   return Math.max(1, (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()));
 }

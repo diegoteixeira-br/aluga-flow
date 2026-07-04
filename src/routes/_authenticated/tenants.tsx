@@ -14,48 +14,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDate } from "@/lib/format";
 import {
-  TENANT_DOC_TYPES,
-  TENANT_DOC_LABEL,
-  type TenantDocType,
-  uploadTenantDoc,
-  getTenantDocSignedUrl,
-  deleteTenantDocFile,
-  maskCPF,
+  TENANT_DOC_TYPES, TENANT_DOC_LABEL, type TenantDocType,
+  uploadTenantDoc, getTenantDocSignedUrl, deleteTenantDocFile, maskCPF,
 } from "@/lib/tenant-docs";
 
 export const Route = createFileRoute("/_authenticated/tenants")({
@@ -87,33 +59,16 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 type Tenant = FormValues & { id: string };
 type TenantDoc = {
-  id: string;
-  tenant_id: string;
-  doc_type: TenantDocType;
-  file_path: string;
-  file_name: string | null;
+  id: string; tenant_id: string; doc_type: TenantDocType;
+  file_path: string; file_name: string | null;
 };
 
 const EMPTY: FormValues = {
-  full_name: "",
-  cpf: "",
-  rg: "",
-  birth_date: "",
-  marital_status: "",
-  occupation: "",
-  phone: "",
-  whatsapp: "",
-  email: "",
-  address_street: "",
-  address_number: "",
-  address_neighborhood: "",
-  address_city: "",
-  address_state: "",
-  address_zip: "",
-  guarantor_name: "",
-  guarantor_cpf: "",
-  guarantor_phone: "",
-  notes: "",
+  full_name: "", cpf: "", rg: "", birth_date: "", marital_status: "", occupation: "",
+  phone: "", whatsapp: "", email: "",
+  address_street: "", address_number: "", address_neighborhood: "",
+  address_city: "", address_state: "", address_zip: "",
+  guarantor_name: "", guarantor_cpf: "", guarantor_phone: "", notes: "",
 };
 
 function TenantsPage() {
@@ -133,7 +88,9 @@ function TenantsPage() {
   const { data: docCounts = {} } = useQuery({
     queryKey: ["tenant-doc-counts"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("tenant_documents").select("tenant_id");
+      const { data, error } = await supabase
+        .from("tenant_documents")
+        .select("tenant_id");
       if (error) throw error;
       const map: Record<string, number> = {};
       (data as { tenant_id: string }[]).forEach((d) => {
@@ -163,12 +120,7 @@ function TenantsPage() {
           <h1 className="text-2xl font-bold tracking-tight">Inquilinos</h1>
           <p className="text-sm text-muted-foreground">{data.length} cadastrado(s)</p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setOpen(true);
-          }}
-        >
+        <Button onClick={() => { setEditing(null); setOpen(true); }}>
           <Plus className="h-4 w-4" /> Novo inquilino
         </Button>
       </div>
@@ -210,14 +162,7 @@ function TenantsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => {
-                              setEditing(t);
-                              setOpen(true);
-                            }}
-                          >
+                          <Button size="icon" variant="ghost" onClick={() => { setEditing(t); setOpen(true); }}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <AlertDialog>
@@ -229,15 +174,11 @@ function TenantsPage() {
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Excluir inquilino?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
+                                <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => del.mutate(t.id)}>
-                                  Excluir
-                                </AlertDialogAction>
+                                <AlertDialogAction onClick={() => del.mutate(t.id)}>Excluir</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -258,20 +199,16 @@ function TenantsPage() {
 }
 
 function TenantDialog({
-  open,
-  onOpenChange,
-  editing,
-}: {
-  open: boolean;
-  onOpenChange: (b: boolean) => void;
-  editing: Tenant | null;
-}) {
+  open, onOpenChange, editing,
+}: { open: boolean; onOpenChange: (b: boolean) => void; editing: Tenant | null }) {
   const qc = useQueryClient();
   const numberRef = useRef<HTMLInputElement>(null);
   const [cepLoading, setCepLoading] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    values: editing ? { ...EMPTY, ...editing } : EMPTY,
+    values: editing
+      ? { ...EMPTY, ...editing }
+      : EMPTY,
   });
 
   const save = useMutation({
@@ -289,11 +226,7 @@ function TenantDialog({
         if (error) throw error;
         return editing.id;
       } else {
-        const { data, error } = await supabase
-          .from("tenants")
-          .insert(payload)
-          .select("id")
-          .single();
+        const { data, error } = await supabase.from("tenants").insert(payload).select("id").single();
         if (error) throw error;
         return (data as { id: string }).id;
       }
@@ -324,32 +257,19 @@ function TenantDialog({
                 <Label>Nome completo *</Label>
                 <Input {...form.register("full_name")} />
                 {form.formState.errors.full_name && (
-                  <p className="text-xs text-destructive">
-                    {form.formState.errors.full_name.message}
-                  </p>
+                  <p className="text-xs text-destructive">{form.formState.errors.full_name.message}</p>
                 )}
               </div>
-              <div className="space-y-1">
-                <Label>CPF</Label>
-                <Input {...form.register("cpf")} />
-              </div>
-              <div className="space-y-1">
-                <Label>RG</Label>
-                <Input {...form.register("rg")} />
-              </div>
-              <div className="space-y-1">
-                <Label>Data de nascimento</Label>
-                <Input type="date" {...form.register("birth_date")} />
-              </div>
+              <div className="space-y-1"><Label>CPF</Label><Input {...form.register("cpf")} /></div>
+              <div className="space-y-1"><Label>RG</Label><Input {...form.register("rg")} /></div>
+              <div className="space-y-1"><Label>Data de nascimento</Label><Input type="date" {...form.register("birth_date")} /></div>
               <div className="space-y-1">
                 <Label>Estado civil</Label>
                 <Select
                   value={form.watch("marital_status") || ""}
                   onValueChange={(v) => form.setValue("marital_status", v)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="solteiro">Solteiro(a)</SelectItem>
                     <SelectItem value="casado">Casado(a)</SelectItem>
@@ -359,24 +279,15 @@ function TenantDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1 sm:col-span-2">
-                <Label>Profissão</Label>
-                <Input {...form.register("occupation")} />
-              </div>
+              <div className="space-y-1 sm:col-span-2"><Label>Profissão</Label><Input {...form.register("occupation")} /></div>
             </div>
           </section>
 
           <section className="space-y-3">
             <h3 className="text-sm font-semibold text-primary">Contato</h3>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="space-y-1">
-                <Label>Telefone principal</Label>
-                <Input {...form.register("phone")} />
-              </div>
-              <div className="space-y-1">
-                <Label>WhatsApp</Label>
-                <Input {...form.register("whatsapp")} />
-              </div>
+              <div className="space-y-1"><Label>Telefone principal</Label><Input {...form.register("phone")} /></div>
+              <div className="space-y-1"><Label>WhatsApp</Label><Input {...form.register("whatsapp")} /></div>
               <div className="space-y-1">
                 <Label>E-mail</Label>
                 <Input type="email" {...form.register("email")} />
@@ -389,9 +300,7 @@ function TenantDialog({
 
           <section className="space-y-3">
             <h3 className="text-sm font-semibold text-primary">Endereço atual</h3>
-            <p className="text-xs text-muted-foreground">
-              Digite o CEP primeiro — Rua, Bairro, Cidade e UF serão preenchidos automaticamente.
-            </p>
+            <p className="text-xs text-muted-foreground">Digite o CEP primeiro — Rua, Bairro, Cidade e UF serão preenchidos automaticamente.</p>
             <div className="grid gap-3 sm:grid-cols-6">
               <div className="space-y-1 sm:col-span-2">
                 <Label>CEP</Label>
@@ -409,18 +318,10 @@ function TenantDialog({
                         const data = await fetchCep(digits);
                         setCepLoading(false);
                         if (data) {
-                          form.setValue("address_street", data.logradouro || "", {
-                            shouldDirty: true,
-                          });
-                          form.setValue("address_neighborhood", data.bairro || "", {
-                            shouldDirty: true,
-                          });
-                          form.setValue("address_city", data.localidade || "", {
-                            shouldDirty: true,
-                          });
-                          form.setValue("address_state", (data.uf || "").toUpperCase(), {
-                            shouldDirty: true,
-                          });
+                          form.setValue("address_street", data.logradouro || "", { shouldDirty: true });
+                          form.setValue("address_neighborhood", data.bairro || "", { shouldDirty: true });
+                          form.setValue("address_city", data.localidade || "", { shouldDirty: true });
+                          form.setValue("address_state", (data.uf || "").toUpperCase(), { shouldDirty: true });
                           setTimeout(() => numberRef.current?.focus(), 50);
                         } else {
                           toast.error("CEP não encontrado");
@@ -429,61 +330,24 @@ function TenantDialog({
                     }}
                   />
                   {cepLoading && (
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                      …
-                    </span>
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">…</span>
                   )}
                 </div>
               </div>
-              <div className="space-y-1 sm:col-span-4">
-                <Label>Rua</Label>
-                <Input {...form.register("address_street")} />
-              </div>
-              <div className="space-y-1 sm:col-span-1">
-                <Label>Número *</Label>
-                <Input
-                  {...(() => {
-                    const r = form.register("address_number");
-                    return {
-                      ...r,
-                      ref: (el: HTMLInputElement | null) => {
-                        r.ref(el);
-                        numberRef.current = el;
-                      },
-                    };
-                  })()}
-                />
-              </div>
-              <div className="space-y-1 sm:col-span-3">
-                <Label>Bairro</Label>
-                <Input {...form.register("address_neighborhood")} />
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <Label>Cidade</Label>
-                <Input {...form.register("address_city")} />
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <Label>UF</Label>
-                <Input maxLength={2} {...form.register("address_state")} />
-              </div>
+              <div className="space-y-1 sm:col-span-4"><Label>Rua</Label><Input {...form.register("address_street")} /></div>
+              <div className="space-y-1 sm:col-span-1"><Label>Número *</Label><Input {...(() => { const r = form.register("address_number"); return { ...r, ref: (el: HTMLInputElement | null) => { r.ref(el); numberRef.current = el; } }; })()} /></div>
+              <div className="space-y-1 sm:col-span-3"><Label>Bairro</Label><Input {...form.register("address_neighborhood")} /></div>
+              <div className="space-y-1 sm:col-span-2"><Label>Cidade</Label><Input {...form.register("address_city")} /></div>
+              <div className="space-y-1 sm:col-span-2"><Label>UF</Label><Input maxLength={2} {...form.register("address_state")} /></div>
             </div>
           </section>
 
           <section className="space-y-3">
             <h3 className="text-sm font-semibold text-primary">Fiador (opcional)</h3>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="space-y-1">
-                <Label>Nome</Label>
-                <Input {...form.register("guarantor_name")} />
-              </div>
-              <div className="space-y-1">
-                <Label>CPF</Label>
-                <Input {...form.register("guarantor_cpf")} />
-              </div>
-              <div className="space-y-1">
-                <Label>Telefone</Label>
-                <Input {...form.register("guarantor_phone")} />
-              </div>
+              <div className="space-y-1"><Label>Nome</Label><Input {...form.register("guarantor_name")} /></div>
+              <div className="space-y-1"><Label>CPF</Label><Input {...form.register("guarantor_cpf")} /></div>
+              <div className="space-y-1"><Label>Telefone</Label><Input {...form.register("guarantor_phone")} /></div>
             </div>
           </section>
 
@@ -500,9 +364,7 @@ function TenantDialog({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={save.isPending}>
               {save.isPending ? "Salvando..." : "Salvar"}
             </Button>
@@ -536,11 +398,8 @@ function TenantDocsManager({ tenantId }: { tenantId: string }) {
       if (!u.user) throw new Error("Sessão expirada");
       const path = await uploadTenantDoc({ userId: u.user.id, tenantId, file });
       const { error } = await supabase.from("tenant_documents").insert({
-        user_id: u.user.id,
-        tenant_id: tenantId,
-        doc_type: docType,
-        file_path: path,
-        file_name: file.name,
+        user_id: u.user.id, tenant_id: tenantId, doc_type: docType,
+        file_path: path, file_name: file.name,
       });
       if (error) throw error;
     },
@@ -591,18 +450,14 @@ function TenantDocsManager({ tenantId }: { tenantId: string }) {
                 upload.mutate({ file, docType: t });
               }}
             />
-            {uploadingType === t && (
-              <span className="text-xs text-muted-foreground">Enviando…</span>
-            )}
+            {uploadingType === t && <span className="text-xs text-muted-foreground">Enviando…</span>}
           </label>
         ))}
       </div>
 
       {docs.length > 0 && (
         <ul className="space-y-1">
-          {docs.map((d) => (
-            <TenantDocRow key={d.id} doc={d} onDelete={() => del.mutate(d)} />
-          ))}
+          {docs.map((d) => <TenantDocRow key={d.id} doc={d} onDelete={() => del.mutate(d)} />)}
         </ul>
       )}
     </div>
@@ -614,13 +469,9 @@ function TenantDocRow({ doc, onDelete }: { doc: TenantDoc; onDelete: () => void 
   useEffect(() => {
     let active = true;
     getTenantDocSignedUrl(doc.file_path)
-      .then((u) => {
-        if (active) setUrl(u);
-      })
+      .then((u) => { if (active) setUrl(u); })
       .catch(() => {});
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [doc.file_path]);
 
   return (
@@ -629,12 +480,7 @@ function TenantDocRow({ doc, onDelete }: { doc: TenantDoc; onDelete: () => void 
         <FileText className="h-4 w-4 shrink-0 text-primary" />
         <span className="shrink-0 font-medium">{TENANT_DOC_LABEL[doc.doc_type]}:</span>
         {url ? (
-          <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            className="truncate text-primary underline"
-          >
+          <a href={url} target="_blank" rel="noreferrer" className="truncate text-primary underline">
             {doc.file_name || "abrir"}
           </a>
         ) : (

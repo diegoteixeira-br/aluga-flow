@@ -9,21 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const schema = z.object({
   nome_interessado: z.string().trim().min(2, "Informe seu nome completo").max(120),
@@ -54,30 +41,17 @@ type Props = {
 const BUCKET = "lead-documents";
 const MAX = 5 * 1024 * 1024;
 
-async function uploadDoc(
-  file: File | null,
-  ownerId: string,
-  propertyId: string,
-  kind: string,
-): Promise<string | null> {
+async function uploadDoc(file: File | null, ownerId: string, propertyId: string, kind: string): Promise<string | null> {
   if (!file) return null;
   if (file.size > MAX) throw new Error(`Arquivo ${kind} maior que 5 MB`);
   const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
   const path = `${ownerId}/${propertyId}/${crypto.randomUUID()}-${kind}.${ext}`;
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: false });
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type, upsert: false });
   if (error) throw error;
   return path;
 }
 
-export function LeadInterestDialog({
-  open,
-  onOpenChange,
-  propertyId,
-  ownerUserId,
-  propertyTitle,
-}: Props) {
+export function LeadInterestDialog({ open, onOpenChange, propertyId, ownerUserId, propertyTitle }: Props) {
   const [docRg, setDocRg] = useState<File | null>(null);
   const [docIncome, setDocIncome] = useState<File | null>(null);
   const [docRes, setDocRes] = useState<File | null>(null);
@@ -122,9 +96,7 @@ export function LeadInterestDialog({
       toast.success("Pré-cadastro enviado! O proprietário entrará em contato.");
       onOpenChange(false);
       form.reset();
-      setDocRg(null);
-      setDocIncome(null);
-      setDocRes(null);
+      setDocRg(null); setDocIncome(null); setDocRes(null);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -138,8 +110,7 @@ export function LeadInterestDialog({
         <DialogHeader>
           <DialogTitle>Tenho interesse — {propertyTitle}</DialogTitle>
           <DialogDescription>
-            Preencha seu pré-cadastro. Quanto mais completo, mais rápido o proprietário consegue
-            avaliar e adiantar o contrato.
+            Preencha seu pré-cadastro. Quanto mais completo, mais rápido o proprietário consegue avaliar e adiantar o contrato.
           </DialogDescription>
         </DialogHeader>
 
@@ -147,52 +118,16 @@ export function LeadInterestDialog({
           <section className="space-y-3">
             <h3 className="text-sm font-semibold">Dados pessoais</h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <Label>Nome completo *</Label>
-                <Input {...form.register("nome_interessado")} />
-                {form.formState.errors.nome_interessado && (
-                  <p className="text-xs text-destructive">
-                    {form.formState.errors.nome_interessado.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label>E-mail *</Label>
-                <Input type="email" {...form.register("email")} />
-                {form.formState.errors.email && (
-                  <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
-                )}
-              </div>
-              <div>
-                <Label>Telefone / WhatsApp *</Label>
-                <Input placeholder="(65) 99999-9999" {...form.register("telefone")} />
-                {form.formState.errors.telefone && (
-                  <p className="text-xs text-destructive">
-                    {form.formState.errors.telefone.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label>CPF *</Label>
-                <Input placeholder="000.000.000-00" {...form.register("cpf")} />
-                {form.formState.errors.cpf && (
-                  <p className="text-xs text-destructive">{form.formState.errors.cpf.message}</p>
-                )}
-              </div>
-              <div>
-                <Label>RG</Label>
-                <Input {...form.register("rg")} />
-              </div>
-              <div>
-                <Label>Nascimento</Label>
-                <Input type="date" {...form.register("birth_date")} />
-              </div>
+              <div className="sm:col-span-2"><Label>Nome completo *</Label><Input {...form.register("nome_interessado")} />{form.formState.errors.nome_interessado && <p className="text-xs text-destructive">{form.formState.errors.nome_interessado.message}</p>}</div>
+              <div><Label>E-mail *</Label><Input type="email" {...form.register("email")} />{form.formState.errors.email && <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>}</div>
+              <div><Label>Telefone / WhatsApp *</Label><Input placeholder="(65) 99999-9999" {...form.register("telefone")} />{form.formState.errors.telefone && <p className="text-xs text-destructive">{form.formState.errors.telefone.message}</p>}</div>
+              <div><Label>CPF *</Label><Input placeholder="000.000.000-00" {...form.register("cpf")} />{form.formState.errors.cpf && <p className="text-xs text-destructive">{form.formState.errors.cpf.message}</p>}</div>
+              <div><Label>RG</Label><Input {...form.register("rg")} /></div>
+              <div><Label>Nascimento</Label><Input type="date" {...form.register("birth_date")} /></div>
               <div>
                 <Label>Estado civil</Label>
                 <Select onValueChange={(v) => form.setValue("marital_status", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="solteiro">Solteiro(a)</SelectItem>
                     <SelectItem value="casado">Casado(a)</SelectItem>
@@ -202,50 +137,26 @@ export function LeadInterestDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Profissão</Label>
-                <Input {...form.register("profession")} />
-              </div>
-              <div>
-                <Label>Renda mensal (R$)</Label>
-                <Input
-                  inputMode="numeric"
-                  placeholder="0,00"
-                  {...form.register("monthly_income")}
-                />
-              </div>
+              <div><Label>Profissão</Label><Input {...form.register("profession")} /></div>
+              <div><Label>Renda mensal (R$)</Label><Input inputMode="numeric" placeholder="0,00" {...form.register("monthly_income")} /></div>
             </div>
           </section>
 
           <section className="space-y-3">
             <h3 className="text-sm font-semibold">Endereço atual</h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <Label>Endereço (rua, número, bairro)</Label>
-                <Input {...form.register("current_address")} />
-              </div>
-              <div>
-                <Label>Cidade</Label>
-                <Input {...form.register("current_city")} />
-              </div>
+              <div className="sm:col-span-2"><Label>Endereço (rua, número, bairro)</Label><Input {...form.register("current_address")} /></div>
+              <div><Label>Cidade</Label><Input {...form.register("current_city")} /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>UF</Label>
-                  <Input maxLength={2} {...form.register("current_state")} />
-                </div>
-                <div>
-                  <Label>CEP</Label>
-                  <Input {...form.register("current_zip")} />
-                </div>
+                <div><Label>UF</Label><Input maxLength={2} {...form.register("current_state")} /></div>
+                <div><Label>CEP</Label><Input {...form.register("current_zip")} /></div>
               </div>
             </div>
           </section>
 
           <section className="space-y-3">
             <h3 className="text-sm font-semibold">Documentos (opcional, até 5 MB cada)</h3>
-            <p className="text-xs text-muted-foreground">
-              PDF, JPG ou PNG. Envie agora para acelerar a análise.
-            </p>
+            <p className="text-xs text-muted-foreground">PDF, JPG ou PNG. Envie agora para acelerar a análise.</p>
             <div className="grid gap-3 sm:grid-cols-3">
               <DocField label="RG ou CNH" file={docRg} onChange={setDocRg} />
               <DocField label="Comprovante de renda" file={docIncome} onChange={setDocIncome} />
@@ -255,17 +166,11 @@ export function LeadInterestDialog({
 
           <section className="space-y-2">
             <Label>Mensagem (opcional)</Label>
-            <Textarea
-              rows={3}
-              placeholder="Quando gostaria de visitar? Alguma observação?"
-              {...form.register("mensagem")}
-            />
+            <Textarea rows={3} placeholder="Quando gostaria de visitar? Alguma observação?" {...form.register("mensagem")} />
           </section>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={submitting}>
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Enviar pré-cadastro
@@ -277,23 +182,11 @@ export function LeadInterestDialog({
   );
 }
 
-function DocField({
-  label,
-  file,
-  onChange,
-}: {
-  label: string;
-  file: File | null;
-  onChange: (f: File | null) => void;
-}) {
+function DocField({ label, file, onChange }: { label: string; file: File | null; onChange: (f: File | null) => void }) {
   return (
     <label className="flex cursor-pointer flex-col gap-1 rounded-md border border-dashed p-3 text-xs hover:bg-accent">
-      <div className="flex items-center gap-2 font-medium">
-        <Upload className="h-3.5 w-3.5" /> {label}
-      </div>
-      <span className="truncate text-muted-foreground">
-        {file ? file.name : "Clique para enviar"}
-      </span>
+      <div className="flex items-center gap-2 font-medium"><Upload className="h-3.5 w-3.5" /> {label}</div>
+      <span className="truncate text-muted-foreground">{file ? file.name : "Clique para enviar"}</span>
       <input
         type="file"
         accept="application/pdf,image/jpeg,image/png"

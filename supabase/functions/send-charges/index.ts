@@ -7,7 +7,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const ASAAS_URLS: Record<string, string> = {
@@ -31,11 +32,7 @@ async function asaasFetch(env: string, key: string, path: string, init?: Request
   });
   const text = await res.text();
   let body: any = null;
-  try {
-    body = text ? JSON.parse(text) : null;
-  } catch {
-    body = text;
-  }
+  try { body = text ? JSON.parse(text) : null; } catch { body = text; }
   if (!res.ok) {
     const msg =
       body?.errors?.map?.((e: any) => e.description).join("; ") ||
@@ -60,10 +57,7 @@ async function ensureCustomer(sb: any, env: string, key: string, tenant: any) {
       notificationDisabled: false,
     }),
   });
-  await sb
-    .from("tenants")
-    .update({ asaas_customer_id: String(created.id) })
-    .eq("id", tenant.id);
+  await sb.from("tenants").update({ asaas_customer_id: String(created.id) }).eq("id", tenant.id);
   return String(created.id);
 }
 
@@ -89,9 +83,7 @@ Deno.serve(async (req) => {
       const body = await req.json().catch(() => ({}));
       if (body?.user_id) onlyUserId = String(body.user_id);
     }
-  } catch {
-    /* noop */
-  }
+  } catch { /* noop */ }
 
   // 1. Buscar perfis com automação ativa
   let profileQ = sb
@@ -134,23 +126,19 @@ Deno.serve(async (req) => {
       continue;
     }
 
-    let created = 0;
-    let failed = 0;
-    const errors: string[] = [];
+    let created = 0; let failed = 0; const errors: string[] = [];
     for (const p of payments ?? []) {
       try {
         const tenant = (p as any).contract?.tenant;
         if (!tenant) throw new Error("Sem inquilino vinculado");
         const customerId = await ensureCustomer(sb, env, key, tenant);
         const refLabel = p.reference_month
-          ? new Date(p.reference_month + "T00:00:00").toLocaleDateString("pt-BR", {
-              month: "long",
-              year: "numeric",
-            })
+          ? new Date(p.reference_month + "T00:00:00").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
           : "";
-        const description = [`Aluguel ${refLabel}`.trim(), prof.auto_charge_message || ""]
-          .filter(Boolean)
-          .join(" — ");
+        const description = [
+          `Aluguel ${refLabel}`.trim(),
+          prof.auto_charge_message || "",
+        ].filter(Boolean).join(" — ");
 
         const charge = await asaasFetch(env, key, "/payments", {
           method: "POST",
@@ -164,14 +152,11 @@ Deno.serve(async (req) => {
           }),
         });
 
-        await sb
-          .from("payments")
-          .update({
-            asaas_payment_id: String(charge.id),
-            asaas_invoice_url: charge.invoiceUrl || charge.bankSlipUrl || "",
-            charge_sent_at: new Date().toISOString(),
-          })
-          .eq("id", p.id);
+        await sb.from("payments").update({
+          asaas_payment_id: String(charge.id),
+          asaas_invoice_url: charge.invoiceUrl || charge.bankSlipUrl || "",
+          charge_sent_at: new Date().toISOString(),
+        }).eq("id", p.id);
 
         created++;
       } catch (e) {
@@ -192,13 +177,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({
-      ok: true,
-      profiles: profiles?.length ?? 0,
-      created: totalCreated,
-      failed: totalFailed,
-      results,
-    }),
+    JSON.stringify({ ok: true, profiles: profiles?.length ?? 0, created: totalCreated, failed: totalFailed, results }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 });

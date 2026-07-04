@@ -4,13 +4,7 @@ import { toast } from "sonner";
 import { Trash2, Upload, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   PHOTO_CATEGORIES,
   CATEGORY_LABEL,
@@ -149,9 +143,7 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
               return;
             }
             if (picked.length > toUpload.length) {
-              toast.info(
-                `Apenas ${toUpload.length} foto(s) serão enviadas (limite ${MAX_PHOTOS_PER_PROPERTY})`,
-              );
+              toast.info(`Apenas ${toUpload.length} foto(s) serão enviadas (limite ${MAX_PHOTOS_PER_PROPERTY})`);
             }
             upload.mutate(toUpload);
           }}
@@ -171,15 +163,9 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
             <div key={p.id} className="space-y-1">
               <div className="relative aspect-square overflow-hidden rounded-md border bg-muted">
                 {urls[p.storage_path] ? (
-                  <img
-                    src={urls[p.storage_path]}
-                    alt={p.category}
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={urls[p.storage_path]} alt={p.category} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="grid h-full place-items-center text-xs text-muted-foreground">
-                    ...
-                  </div>
+                  <div className="grid h-full place-items-center text-xs text-muted-foreground">...</div>
                 )}
                 <Button
                   type="button"
@@ -191,20 +177,11 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              <Select
-                value={p.category}
-                onValueChange={(v) =>
-                  setCategory.mutate({ id: p.id, category: v as PhotoCategory })
-                }
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
+              <Select value={p.category} onValueChange={(v) => setCategory.mutate({ id: p.id, category: v as PhotoCategory })}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {PHOTO_CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {CATEGORY_LABEL[c]}
-                    </SelectItem>
+                    <SelectItem key={c} value={c}>{CATEGORY_LABEL[c]}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

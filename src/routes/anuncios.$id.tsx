@@ -16,9 +16,7 @@ export const Route = createFileRoute("/anuncios/$id")({
   loader: async ({ params }) => {
     const { data: prop } = await supabase
       .from("properties")
-      .select(
-        "ad_title, nickname, ad_description, notes, city, state, neighborhood, type, bedrooms, rent_amount",
-      )
+      .select("ad_title, nickname, ad_description, notes, city, state, neighborhood, type, bedrooms, rent_amount")
       .eq("id", params.id)
       .eq("listed_public", true)
       .maybeSingle();
@@ -50,10 +48,7 @@ export const Route = createFileRoute("/anuncios/$id")({
     }
     const { prop, coverUrl } = loaderData;
     const title = `${prop.ad_title ?? prop.nickname} — Aluguel em ${prop.city}/${prop.state} | AlugaFlow`;
-    const rawDesc =
-      prop.ad_description ||
-      prop.notes ||
-      `${prop.type ?? "Imóvel"} ${prop.bedrooms ? `com ${prop.bedrooms} quartos ` : ""}para alugar em ${[prop.neighborhood, prop.city, prop.state].filter(Boolean).join(", ")} por R$ ${Number(prop.rent_amount ?? 0).toLocaleString("pt-BR")}/mês.`;
+    const rawDesc = prop.ad_description || prop.notes || `${prop.type ?? "Imóvel"} ${prop.bedrooms ? `com ${prop.bedrooms} quartos ` : ""}para alugar em ${[prop.neighborhood, prop.city, prop.state].filter(Boolean).join(", ")} por R$ ${Number(prop.rent_amount ?? 0).toLocaleString("pt-BR")}/mês.`;
     const description = rawDesc.replace(/\s+/g, " ").trim().slice(0, 160);
     const meta: Array<Record<string, string>> = [
       { title },
@@ -81,9 +76,7 @@ export const Route = createFileRoute("/anuncios/$id")({
       <div className="mx-auto max-w-3xl px-4 py-20 text-center">
         <h1 className="text-2xl font-bold">Erro ao carregar anúncio</h1>
         <p className="mt-2 text-muted-foreground">{error.message}</p>
-        <Button asChild className="mt-6">
-          <Link to="/anuncios">Voltar para anúncios</Link>
-        </Button>
+        <Button asChild className="mt-6"><Link to="/anuncios">Voltar para anúncios</Link></Button>
       </div>
     </div>
   ),
@@ -92,9 +85,7 @@ export const Route = createFileRoute("/anuncios/$id")({
       <PublicHeader />
       <div className="mx-auto max-w-3xl px-4 py-20 text-center">
         <h1 className="text-2xl font-bold">Anúncio não encontrado</h1>
-        <Button asChild className="mt-6">
-          <Link to="/anuncios">Voltar</Link>
-        </Button>
+        <Button asChild className="mt-6"><Link to="/anuncios">Voltar</Link></Button>
       </div>
     </div>
   ),
@@ -111,9 +102,7 @@ function AnuncioDetail() {
     queryFn: async () => {
       const { data: prop, error } = await supabase
         .from("properties")
-        .select(
-          "id, user_id, ad_title, nickname, ad_description, notes, address, city, state, neighborhood, zip_code, type, bedrooms, bathrooms, area_m2, rent_amount, listed_public, contact_phone, show_contact_public",
-        )
+        .select("id, user_id, ad_title, nickname, ad_description, notes, address, city, state, neighborhood, zip_code, type, bedrooms, bathrooms, area_m2, rent_amount, listed_public, contact_phone, show_contact_public")
         .eq("id", id)
         .eq("listed_public", true)
         .maybeSingle();
@@ -121,16 +110,8 @@ function AnuncioDetail() {
       if (!prop) throw notFound();
 
       const [{ data: photos }, { data: owner }] = await Promise.all([
-        supabase
-          .from("property_photos")
-          .select("storage_path, category, sort_order")
-          .eq("property_id", id)
-          .order("sort_order"),
-        supabase
-          .from("profiles")
-          .select("full_name, public_phone, show_phone_public")
-          .eq("id", prop.user_id)
-          .maybeSingle(),
+        supabase.from("property_photos").select("storage_path, category, sort_order").eq("property_id", id).order("sort_order"),
+        supabase.from("profiles").select("full_name, public_phone, show_phone_public").eq("id", prop.user_id).maybeSingle(),
       ]);
       const paths = (photos ?? []).map((p) => p.storage_path);
       const [thumbUrls, fullUrls] = await Promise.all([
@@ -146,45 +127,28 @@ function AnuncioDetail() {
     },
   });
 
+
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <PublicHeader />
-        <p className="p-10 text-center">Carregando...</p>
-      </div>
-    );
+    return <div className="min-h-screen bg-background"><PublicHeader /><p className="p-10 text-center">Carregando...</p></div>;
   }
   if (isError || !data) {
-    return (
-      <div className="min-h-screen bg-background">
-        <PublicHeader />
-        <p className="p-10 text-center">Anúncio não encontrado.</p>
-      </div>
-    );
+    return <div className="min-h-screen bg-background"><PublicHeader /><p className="p-10 text-center">Anúncio não encontrado.</p></div>;
   }
 
   const { prop, photos, owner } = data;
-  const description =
-    prop.ad_description ||
-    prop.notes ||
-    "Entre em contato com o proprietário para mais informações.";
+  const description = prop.ad_description || prop.notes || "Entre em contato com o proprietário para mais informações.";
 
   return (
     <div className="min-h-screen bg-background">
       <PublicHeader />
 
       <div className="mx-auto max-w-6xl px-4 py-6">
-        <Button asChild variant="ghost" size="sm" className="mb-3">
-          <Link to="/anuncios">
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </Link>
-        </Button>
+        <Button asChild variant="ghost" size="sm" className="mb-3"><Link to="/anuncios"><ArrowLeft className="h-4 w-4" /> Voltar</Link></Button>
+
 
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              {prop.ad_title ?? prop.nickname}
-            </h1>
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{prop.ad_title ?? prop.nickname}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               <MapPin className="mr-1 inline h-4 w-4" />
               {[prop.address, prop.neighborhood, prop.city, prop.state].filter(Boolean).join(", ")}
@@ -192,24 +156,14 @@ function AnuncioDetail() {
 
             <div className="mt-4 flex flex-wrap gap-3 text-sm">
               <span className="rounded-full border px-3 py-1 capitalize">{prop.type}</span>
-              <span className="flex items-center gap-1 rounded-full border px-3 py-1">
-                <Bed className="h-4 w-4" /> {prop.bedrooms ?? 0} quartos
-              </span>
-              <span className="flex items-center gap-1 rounded-full border px-3 py-1">
-                <Bath className="h-4 w-4" /> {prop.bathrooms ?? 0} banheiros
-              </span>
-              {prop.area_m2 ? (
-                <span className="flex items-center gap-1 rounded-full border px-3 py-1">
-                  <Maximize className="h-4 w-4" /> {prop.area_m2} m²
-                </span>
-              ) : null}
+              <span className="flex items-center gap-1 rounded-full border px-3 py-1"><Bed className="h-4 w-4" /> {prop.bedrooms ?? 0} quartos</span>
+              <span className="flex items-center gap-1 rounded-full border px-3 py-1"><Bath className="h-4 w-4" /> {prop.bathrooms ?? 0} banheiros</span>
+              {prop.area_m2 ? <span className="flex items-center gap-1 rounded-full border px-3 py-1"><Maximize className="h-4 w-4" /> {prop.area_m2} m²</span> : null}
             </div>
 
             <div className="mt-6">
               <h2 className="text-lg font-semibold">Descrição</h2>
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                {description}
-              </p>
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{description}</p>
             </div>
 
             {photos.length > 0 && (
@@ -217,20 +171,8 @@ function AnuncioDetail() {
                 <h2 className="text-lg font-semibold">Fotos do imóvel ({photos.length})</h2>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {photos.map((p, i) => (
-                    <button
-                      type="button"
-                      key={i}
-                      onClick={() => setLightboxIdx(i)}
-                      className="aspect-square overflow-hidden rounded-lg bg-muted cursor-zoom-in"
-                    >
-                      {p.url && (
-                        <img
-                          src={p.url}
-                          alt=""
-                          loading="lazy"
-                          className="h-full w-full object-cover transition hover:scale-105"
-                        />
-                      )}
+                    <button type="button" key={i} onClick={() => setLightboxIdx(i)} className="aspect-square overflow-hidden rounded-lg bg-muted cursor-zoom-in">
+                      {p.url && <img src={p.url} alt="" loading="lazy" className="h-full w-full object-cover transition hover:scale-105" />}
                     </button>
                   ))}
                 </div>
@@ -242,16 +184,10 @@ function AnuncioDetail() {
             <Card>
               <CardContent className="p-5">
                 <p className="text-xs text-muted-foreground">Valor do aluguel</p>
-                <p className="text-3xl font-bold text-primary">
-                  {formatBRL(prop.rent_amount)}
-                  <span className="text-sm font-normal text-muted-foreground">/mês</span>
-                </p>
-                <Button className="mt-4 w-full" size="lg" onClick={() => setOpenLead(true)}>
-                  Tenho interesse
-                </Button>
+                <p className="text-3xl font-bold text-primary">{formatBRL(prop.rent_amount)}<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
+                <Button className="mt-4 w-full" size="lg" onClick={() => setOpenLead(true)}>Tenho interesse</Button>
                 <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-                  Preencha seu pré-cadastro (dados pessoais e documentos) para o proprietário
-                  avaliar e adiantar o contrato.
+                  Preencha seu pré-cadastro (dados pessoais e documentos) para o proprietário avaliar e adiantar o contrato.
                 </p>
               </CardContent>
             </Card>
@@ -264,45 +200,26 @@ function AnuncioDetail() {
               propertyTitle={prop.ad_title ?? prop.nickname}
             />
 
+
             {(() => {
-              const phone =
-                prop.show_contact_public && prop.contact_phone
-                  ? prop.contact_phone
-                  : owner?.show_phone_public && owner?.public_phone
-                    ? owner.public_phone
-                    : null;
+              const phone = (prop.show_contact_public && prop.contact_phone)
+                ? prop.contact_phone
+                : (owner?.show_phone_public && owner?.public_phone) ? owner.public_phone : null;
               if (!phone) return null;
               const digits = phone.replace(/\D/g, "");
-              const waNumber =
-                digits.length === 11 || digits.length === 10 ? `55${digits}` : digits;
-              const waMsg = encodeURIComponent(
-                `Olá! Gostaria de agendar uma visita ao imóvel "${prop.ad_title ?? prop.nickname}" anunciado no AlugaFlow.`,
-              );
+              const waNumber = digits.length === 11 || digits.length === 10 ? `55${digits}` : digits;
+              const waMsg = encodeURIComponent(`Olá! Gostaria de agendar uma visita ao imóvel "${prop.ad_title ?? prop.nickname}" anunciado no AlugaFlow.`);
               return (
                 <Card>
                   <CardContent className="p-5">
                     <p className="text-sm font-semibold">Agendar visita</p>
-                    {owner?.full_name && (
-                      <p className="mt-1 text-sm text-muted-foreground">{owner.full_name}</p>
-                    )}
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Fale rápido com o proprietário para tirar dúvidas ou marcar uma visita.
-                    </p>
-                    <a
-                      href={`tel:${phone}`}
-                      className="mt-3 flex items-center gap-2 text-sm text-primary hover:underline"
-                    >
+                    {owner?.full_name && <p className="mt-1 text-sm text-muted-foreground">{owner.full_name}</p>}
+                    <p className="mt-1 text-xs text-muted-foreground">Fale rápido com o proprietário para tirar dúvidas ou marcar uma visita.</p>
+                    <a href={`tel:${phone}`} className="mt-3 flex items-center gap-2 text-sm text-primary hover:underline">
                       <Phone className="h-4 w-4" /> {phone}
                     </a>
-                    <Button
-                      asChild
-                      className="mt-3 w-full gap-2 bg-[#25D366] text-white hover:bg-[#1ebe5b]"
-                    >
-                      <a
-                        href={`https://wa.me/${waNumber}?text=${waMsg}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                    <Button asChild className="mt-3 w-full gap-2 bg-[#25D366] text-white hover:bg-[#1ebe5b]">
+                      <a href={`https://wa.me/${waNumber}?text=${waMsg}`} target="_blank" rel="noopener noreferrer">
                         <MessageCircle className="h-4 w-4" /> Chamar no WhatsApp
                       </a>
                     </Button>
@@ -314,35 +231,18 @@ function AnuncioDetail() {
         </div>
       </div>
 
+
       <Dialog open={lightboxIdx !== null} onOpenChange={(o) => !o && setLightboxIdx(null)}>
         <DialogContent className="max-w-5xl border-0 bg-transparent p-0 shadow-none">
           <DialogTitle className="sr-only">Foto do imóvel</DialogTitle>
           {lightboxIdx !== null && photos[lightboxIdx]?.fullUrl && (
             <div className="relative">
-              <img
-                src={photos[lightboxIdx].fullUrl}
-                alt=""
-                className="mx-auto max-h-[85vh] w-auto rounded-lg object-contain"
-              />
+              <img src={photos[lightboxIdx].fullUrl} alt="" className="mx-auto max-h-[85vh] w-auto rounded-lg object-contain" />
               {photos.length > 1 && (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => setLightboxIdx((i) => (i! - 1 + photos.length) % photos.length)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
-                  >
-                    <ChevronLeft className="h-6 w-6" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLightboxIdx((i) => (i! + 1) % photos.length)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
-                  >
-                    <ChevronRight className="h-6 w-6" />
-                  </button>
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
-                    {lightboxIdx + 1} / {photos.length}
-                  </div>
+                  <button type="button" onClick={() => setLightboxIdx((i) => (i! - 1 + photos.length) % photos.length)} className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"><ChevronLeft className="h-6 w-6" /></button>
+                  <button type="button" onClick={() => setLightboxIdx((i) => (i! + 1) % photos.length)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"><ChevronRight className="h-6 w-6" /></button>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white">{lightboxIdx + 1} / {photos.length}</div>
                 </>
               )}
             </div>

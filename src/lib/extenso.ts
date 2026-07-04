@@ -1,41 +1,8 @@
 // Conversão de número para extenso em reais (BRL) — implementação simples e suficiente.
 const unidades = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
-const especiais = [
-  "dez",
-  "onze",
-  "doze",
-  "treze",
-  "quatorze",
-  "quinze",
-  "dezesseis",
-  "dezessete",
-  "dezoito",
-  "dezenove",
-];
-const dezenas = [
-  "",
-  "",
-  "vinte",
-  "trinta",
-  "quarenta",
-  "cinquenta",
-  "sessenta",
-  "setenta",
-  "oitenta",
-  "noventa",
-];
-const centenas = [
-  "",
-  "cento",
-  "duzentos",
-  "trezentos",
-  "quatrocentos",
-  "quinhentos",
-  "seiscentos",
-  "setecentos",
-  "oitocentos",
-  "novecentos",
-];
+const especiais = ["dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"];
+const dezenas = ["", "", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
+const centenas = ["", "cento", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"];
 
 function ate999(n: number): string {
   if (n === 0) return "";
@@ -51,10 +18,7 @@ function ate999(n: number): string {
     if (d) parts.push(dezenas[d]);
     if (u) parts.push(unidades[u]);
   }
-  return parts
-    .filter(Boolean)
-    .join(d > 1 && u ? " e " : " e ")
-    .replace(/ e  e /g, " e ");
+  return parts.filter(Boolean).join(d > 1 && u ? " e " : " e ").replace(/ e  e /g, " e ");
 }
 
 function inteiroExtenso(n: number): string {
@@ -76,8 +40,7 @@ export function valorPorExtenso(valor: number): string {
   const centavos = v % 100;
   const partes: string[] = [];
   if (reais > 0) partes.push(`${inteiroExtenso(reais)} ${reais === 1 ? "real" : "reais"}`);
-  if (centavos > 0)
-    partes.push(`${inteiroExtenso(centavos)} ${centavos === 1 ? "centavo" : "centavos"}`);
+  if (centavos > 0) partes.push(`${inteiroExtenso(centavos)} ${centavos === 1 ? "centavo" : "centavos"}`);
   if (partes.length === 0) return "zero reais";
   return partes.join(" e ");
 }

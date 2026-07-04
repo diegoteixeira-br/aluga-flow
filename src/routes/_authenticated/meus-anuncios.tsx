@@ -11,13 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pencil, Mail, Phone, Eye, Check } from "lucide-react";
 import { formatBRL, formatDate } from "@/lib/format";
 
@@ -25,6 +19,8 @@ export const Route = createFileRoute("/_authenticated/meus-anuncios")({
   head: () => ({ meta: [{ title: "Meus Anúncios — AlugaFlow" }] }),
   component: MyAdsPage,
 });
+
+
 
 type Prop = {
   id: string;
@@ -73,11 +69,7 @@ function MyAdsPage() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("plan")
-        .eq("id", u.user.id)
-        .maybeSingle();
+      const { data } = await supabase.from("profiles").select("plan").eq("id", u.user.id).maybeSingle();
       return data;
     },
   });
@@ -87,9 +79,7 @@ function MyAdsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select(
-          "id, nickname, ad_title, ad_description, rent_amount, city, neighborhood, listed_public, contact_phone, show_contact_public",
-        )
+        .select("id, nickname, ad_title, ad_description, rent_amount, city, neighborhood, listed_public, contact_phone, show_contact_public")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Prop[];
@@ -101,9 +91,7 @@ function MyAdsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("leads")
-        .select(
-          "id, property_id, nome_interessado, telefone, email, cpf, rg, birth_date, marital_status, profession, monthly_income, current_address, current_city, current_state, current_zip, mensagem, visualizado, created_at, status, doc_rg_path, doc_income_path, doc_residence_path",
-        )
+        .select("id, property_id, nome_interessado, telefone, email, cpf, rg, birth_date, marital_status, profession, monthly_income, current_address, current_city, current_state, current_zip, mensagem, visualizado, created_at, status, doc_rg_path, doc_income_path, doc_residence_path")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Lead[];
@@ -118,28 +106,17 @@ function MyAdsPage() {
       if (value) {
         const { data: u } = await supabase.auth.getUser();
         if (!u.user) throw new Error("Sessão expirada");
-        const { data: chk, error: chkErr } = await supabase.rpc("check_plan_limit", {
-          _user_id: u.user.id,
-          _resource: "listings",
-        });
+        const { data: chk, error: chkErr } = await supabase.rpc("check_plan_limit", { _user_id: u.user.id, _resource: "listings" });
         if (chkErr) throw chkErr;
         const r = chk as { allowed: boolean; current: number; max: number | null; plan: string };
         if (!r.allowed) {
-          throw new Error(
-            `Limite de anúncios atingido (${r.current}/${r.max}) no plano ${r.plan}. Faça upgrade em Meu plano.`,
-          );
+          throw new Error(`Limite de anúncios atingido (${r.current}/${r.max}) no plano ${r.plan}. Faça upgrade em Meu plano.`);
         }
       }
-      const { error } = await supabase
-        .from("properties")
-        .update({ listed_public: value })
-        .eq("id", id);
+      const { error } = await supabase.from("properties").update({ listed_public: value }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["my-properties-ads"] });
-      toast.success("Anúncio atualizado");
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["my-properties-ads"] }); toast.success("Anúncio atualizado"); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -173,27 +150,16 @@ function MyAdsPage() {
         notes: lead.mensagem,
       });
       if (insErr) throw insErr;
-      const { error: upErr } = await supabase
-        .from("leads")
-        .update({ status: "convertido", visualizado: true })
-        .eq("id", lead.id);
+      const { error: upErr } = await supabase.from("leads").update({ status: "convertido", visualizado: true }).eq("id", lead.id);
       if (upErr) throw upErr;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["my-leads"] });
-      toast.success("Inquilino criado! Revise os dados em /inquilinos.");
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["my-leads"] }); toast.success("Inquilino criado! Revise os dados em /inquilinos."); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   async function openDoc(path: string) {
-    const { data, error } = await supabase.storage
-      .from("lead-documents")
-      .createSignedUrl(path, 3600);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    const { data, error } = await supabase.storage.from("lead-documents").createSignedUrl(path, 3600);
+    if (error) { toast.error(error.message); return; }
     window.open(data.signedUrl, "_blank");
   }
 
@@ -212,218 +178,107 @@ function MyAdsPage() {
       <Tabs defaultValue="anuncios">
         <TabsList>
           <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
-          <TabsTrigger value="leads">
-            Leads recebidos{" "}
-            {unread > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {unread}
-              </Badge>
-            )}
-          </TabsTrigger>
+          <TabsTrigger value="leads">Leads recebidos {unread > 0 && <Badge variant="destructive" className="ml-2">{unread}</Badge>}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="anuncios" className="space-y-3">
           {props.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                Cadastre um imóvel para começar a anunciar.
+            <Card><CardContent className="p-6 text-center text-muted-foreground">Cadastre um imóvel para começar a anunciar.</CardContent></Card>
+          ) : props.map((p) => (
+            <Card key={p.id}>
+              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold">{p.ad_title || p.nickname}</p>
+                    {p.listed_public && <Badge>Anunciando</Badge>}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {[p.neighborhood, p.city].filter(Boolean).join(", ") || "Sem localização"} · {formatBRL(p.rent_amount)}/mês
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={p.listed_public}
+                      onCheckedChange={(v) => toggle.mutate({ id: p.id, value: v })}
+                    />
+                    <Label className="text-xs">Anunciar no portal</Label>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setEditing(p)}><Pencil className="h-4 w-4" /> Editar anúncio</Button>
+                </div>
               </CardContent>
             </Card>
-          ) : (
-            props.map((p) => (
-              <Card key={p.id}>
-                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold">{p.ad_title || p.nickname}</p>
-                      {p.listed_public && <Badge>Anunciando</Badge>}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {[p.neighborhood, p.city].filter(Boolean).join(", ") || "Sem localização"} ·{" "}
-                      {formatBRL(p.rent_amount)}/mês
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={p.listed_public}
-                        onCheckedChange={(v) => toggle.mutate({ id: p.id, value: v })}
-                      />
-                      <Label className="text-xs">Anunciar no portal</Label>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => setEditing(p)}>
-                      <Pencil className="h-4 w-4" /> Editar anúncio
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
+          ))}
         </TabsContent>
 
         <TabsContent value="leads" className="space-y-3">
           {leads.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                Nenhum lead recebido ainda.
-              </CardContent>
-            </Card>
-          ) : (
-            leads.map((l) => {
-              const prop = propsById.get(l.property_id);
-              return (
-                <Card key={l.id} className={l.visualizado ? "" : "border-primary/50 bg-primary/5"}>
-                  <CardContent className="space-y-3 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-semibold">{l.nome_interessado}</p>
-                          {!l.visualizado && <Badge variant="destructive">Novo</Badge>}
-                          {l.status === "convertido" && (
-                            <Badge variant="default">Convertido em inquilino</Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Interesse em: {prop?.ad_title || prop?.nickname || "—"} ·{" "}
-                          {formatDate(l.created_at)}
-                        </p>
+            <Card><CardContent className="p-6 text-center text-muted-foreground">Nenhum lead recebido ainda.</CardContent></Card>
+          ) : leads.map((l) => {
+            const prop = propsById.get(l.property_id);
+            return (
+              <Card key={l.id} className={l.visualizado ? "" : "border-primary/50 bg-primary/5"}>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold">{l.nome_interessado}</p>
+                        {!l.visualizado && <Badge variant="destructive">Novo</Badge>}
+                        {l.status === "convertido" && <Badge variant="default">Convertido em inquilino</Badge>}
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        {!l.visualizado && (
-                          <Button size="sm" variant="ghost" onClick={() => markRead.mutate(l.id)}>
-                            <Check className="h-4 w-4" /> Marcar lido
-                          </Button>
-                        )}
-                        {l.status !== "convertido" && (
-                          <Button
-                            size="sm"
-                            onClick={() => convertToTenant.mutate(l)}
-                            disabled={convertToTenant.isPending}
-                          >
-                            Converter em inquilino
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid gap-2 text-sm sm:grid-cols-2">
-                      <div className="flex flex-wrap gap-3">
-                        <a
-                          href={`tel:${l.telefone}`}
-                          className="flex items-center gap-1 text-primary hover:underline"
-                        >
-                          <Phone className="h-3.5 w-3.5" /> {l.telefone}
-                        </a>
-                        <a
-                          href={`https://wa.me/55${l.telefone.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 text-primary hover:underline"
-                        >
-                          <Mail className="h-3.5 w-3.5" /> WhatsApp
-                        </a>
-                        {l.email && (
-                          <a
-                            href={`mailto:${l.email}`}
-                            className="flex items-center gap-1 text-primary hover:underline"
-                          >
-                            <Mail className="h-3.5 w-3.5" /> {l.email}
-                          </a>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {l.cpf && (
-                          <>
-                            CPF: {l.cpf}
-                            <br />
-                          </>
-                        )}
-                        {l.rg && (
-                          <>
-                            RG: {l.rg}
-                            <br />
-                          </>
-                        )}
-                        {l.birth_date && (
-                          <>
-                            Nasc.: {formatDate(l.birth_date)}
-                            <br />
-                          </>
-                        )}
-                        {l.marital_status && (
-                          <>
-                            Estado civil: {l.marital_status}
-                            <br />
-                          </>
-                        )}
-                        {l.profession && (
-                          <>
-                            Profissão: {l.profession}
-                            <br />
-                          </>
-                        )}
-                        {l.monthly_income != null && (
-                          <>
-                            Renda: {formatBRL(l.monthly_income)}
-                            <br />
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {(l.current_address || l.current_city) && (
                       <p className="text-xs text-muted-foreground">
-                        Endereço atual:{" "}
-                        {[l.current_address, l.current_city, l.current_state, l.current_zip]
-                          .filter(Boolean)
-                          .join(", ")}
+                        Interesse em: {prop?.ad_title || prop?.nickname || "—"} · {formatDate(l.created_at)}
                       </p>
-                    )}
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {!l.visualizado && (
+                        <Button size="sm" variant="ghost" onClick={() => markRead.mutate(l.id)}><Check className="h-4 w-4" /> Marcar lido</Button>
+                      )}
+                      {l.status !== "convertido" && (
+                        <Button size="sm" onClick={() => convertToTenant.mutate(l)} disabled={convertToTenant.isPending}>
+                          Converter em inquilino
+                        </Button>
+                      )}
+                    </div>
+                  </div>
 
-                    {l.mensagem && (
-                      <p className="rounded-md bg-muted/50 p-2 text-sm">{l.mensagem}</p>
-                    )}
+                  <div className="grid gap-2 text-sm sm:grid-cols-2">
+                    <div className="flex flex-wrap gap-3">
+                      <a href={`tel:${l.telefone}`} className="flex items-center gap-1 text-primary hover:underline"><Phone className="h-3.5 w-3.5" /> {l.telefone}</a>
+                      <a href={`https://wa.me/55${l.telefone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary hover:underline"><Mail className="h-3.5 w-3.5" /> WhatsApp</a>
+                      {l.email && <a href={`mailto:${l.email}`} className="flex items-center gap-1 text-primary hover:underline"><Mail className="h-3.5 w-3.5" /> {l.email}</a>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {l.cpf && <>CPF: {l.cpf}<br /></>}
+                      {l.rg && <>RG: {l.rg}<br /></>}
+                      {l.birth_date && <>Nasc.: {formatDate(l.birth_date)}<br /></>}
+                      {l.marital_status && <>Estado civil: {l.marital_status}<br /></>}
+                      {l.profession && <>Profissão: {l.profession}<br /></>}
+                      {l.monthly_income != null && <>Renda: {formatBRL(l.monthly_income)}<br /></>}
+                    </div>
+                  </div>
 
-                    {(l.doc_rg_path || l.doc_income_path || l.doc_residence_path) && (
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        {l.doc_rg_path && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDoc(l.doc_rg_path!)}
-                          >
-                            RG/CNH
-                          </Button>
-                        )}
-                        {l.doc_income_path && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDoc(l.doc_income_path!)}
-                          >
-                            Comprovante de renda
-                          </Button>
-                        )}
-                        {l.doc_residence_path && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDoc(l.doc_residence_path!)}
-                          >
-                            Comprovante de residência
-                          </Button>
-                        )}
-                      </div>
-                    )}
+                  {(l.current_address || l.current_city) && (
+                    <p className="text-xs text-muted-foreground">
+                      Endereço atual: {[l.current_address, l.current_city, l.current_state, l.current_zip].filter(Boolean).join(", ")}
+                    </p>
+                  )}
 
-                    {l.visualizado && l.status !== "convertido" && (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
+                  {l.mensagem && <p className="rounded-md bg-muted/50 p-2 text-sm">{l.mensagem}</p>}
+
+                  {(l.doc_rg_path || l.doc_income_path || l.doc_residence_path) && (
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {l.doc_rg_path && <Button size="sm" variant="outline" onClick={() => openDoc(l.doc_rg_path!)}>RG/CNH</Button>}
+                      {l.doc_income_path && <Button size="sm" variant="outline" onClick={() => openDoc(l.doc_income_path!)}>Comprovante de renda</Button>}
+                      {l.doc_residence_path && <Button size="sm" variant="outline" onClick={() => openDoc(l.doc_residence_path!)}>Comprovante de residência</Button>}
+                    </div>
+                  )}
+
+                  {l.visualizado && l.status !== "convertido" && <Eye className="h-4 w-4 text-muted-foreground" />}
+                </CardContent>
+              </Card>
+            );
+          })}
         </TabsContent>
       </Tabs>
 
@@ -451,8 +306,7 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
   const save = useMutation({
     mutationFn: async () => {
       if (!editing) return;
-      const { error } = await supabase
-        .from("properties")
+      const { error } = await supabase.from("properties")
         .update({
           ad_title: adTitle.trim() || null,
           ad_description: adDescription.trim() || null,
@@ -462,20 +316,14 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
         .eq("id", editing.id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["my-properties-ads"] });
-      toast.success("Anúncio salvo");
-      onClose();
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["my-properties-ads"] }); toast.success("Anúncio salvo"); onClose(); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
     <Dialog open={!!editing} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Editar anúncio</DialogTitle>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>Editar anúncio</DialogTitle></DialogHeader>
         {editing && (
           <div className="space-y-3">
             <div className="space-y-1">
@@ -505,9 +353,7 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
                 placeholder="(65) 99999-9999"
                 maxLength={20}
               />
-              <p className="text-xs text-muted-foreground">
-                Aparece na página do anúncio para o interessado ligar ou chamar no WhatsApp.
-              </p>
+              <p className="text-xs text-muted-foreground">Aparece na página do anúncio para o interessado ligar ou chamar no WhatsApp.</p>
             </div>
             <div className="flex items-center gap-2 rounded-md border p-3">
               <Switch checked={showContact} onCheckedChange={setShowContact} />
@@ -516,14 +362,11 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
           </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? "Salvando..." : "Salvar"}
-          </Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

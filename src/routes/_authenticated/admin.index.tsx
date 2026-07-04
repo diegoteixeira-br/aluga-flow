@@ -21,16 +21,8 @@ function AdminHome() {
     { label: "Novos (30 dias)", value: m.new_users_30d ?? 0, icon: UserPlus },
     { label: "Imóveis anunciados", value: m.total_properties ?? 0, icon: Building2 },
     { label: "Leads recebidos", value: m.total_leads ?? 0, icon: Megaphone },
-    {
-      label: "Receita estimada/mês",
-      value: formatBRL(Number(m.estimated_monthly_revenue ?? 0)),
-      icon: DollarSign,
-    },
-    {
-      label: "Plano free / pago",
-      value: `${planCounts.free ?? 0} / ${(planCounts.investidor ?? 0) + (planCounts.imobiliaria ?? 0)}`,
-      icon: TrendingUp,
-    },
+    { label: "Receita estimada/mês", value: formatBRL(Number(m.estimated_monthly_revenue ?? 0)), icon: DollarSign },
+    { label: "Plano free / pago", value: `${planCounts.free ?? 0} / ${(planCounts.investidor ?? 0) + (planCounts.imobiliaria ?? 0)}`, icon: TrendingUp },
   ];
 
   return (
@@ -53,9 +45,7 @@ function AdminHome() {
         ))}
       </div>
       <Card>
-        <CardHeader>
-          <CardTitle>Distribuição por plano</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Distribuição por plano</CardTitle></CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-3">
           {["free", "investidor", "imobiliaria"].map((p) => (
             <div key={p} className="rounded-md border p-4">

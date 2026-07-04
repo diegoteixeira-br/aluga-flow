@@ -47,6 +47,9 @@ export async function getPostBySlug(args: { data: { slug: string } } | { slug: s
 }
 
 export async function listAllPostSlugs() {
-  const { data } = await supabase.from("posts").select("slug,updated_at").eq("published", true);
+  const { data } = await supabase
+    .from("posts")
+    .select("slug,updated_at")
+    .eq("published", true);
   return data ?? [];
 }

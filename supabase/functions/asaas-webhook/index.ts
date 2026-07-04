@@ -13,11 +13,7 @@ Deno.serve(async (req) => {
   if (!expected || token !== expected) return new Response("Unauthorized", { status: 401 });
 
   let body: any = {};
-  try {
-    body = await req.json();
-  } catch {
-    return new Response("Bad JSON", { status: 400 });
-  }
+  try { body = await req.json(); } catch { return new Response("Bad JSON", { status: 400 }); }
 
   const { event, payment } = body;
   if (!event || !payment?.id) return new Response("ignored", { status: 200 });
@@ -32,8 +28,7 @@ Deno.serve(async (req) => {
   const refunded = new Set(["PAYMENT_REFUNDED", "PAYMENT_DELETED"]);
 
   if (paid.has(event)) {
-    const paidDate =
-      payment.paymentDate || payment.clientPaymentDate || new Date().toISOString().slice(0, 10);
+    const paidDate = payment.paymentDate || payment.clientPaymentDate || new Date().toISOString().slice(0, 10);
     const { error } = await sb
       .from("payments")
       .update({

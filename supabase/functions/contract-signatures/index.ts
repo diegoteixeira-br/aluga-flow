@@ -40,16 +40,11 @@ Deno.serve(async (req) => {
   const userId = userData.user.id;
 
   let body: any = {};
-  try {
-    body = await req.json();
-  } catch {
-    return json({ error: "Bad JSON" }, 400);
-  }
+  try { body = await req.json(); } catch { return json({ error: "Bad JSON" }, 400); }
 
   const action = body.action as string;
   const contractId = body.contractId as string;
-  if (!contractId || typeof contractId !== "string")
-    return json({ error: "contractId obrigatório" }, 400);
+  if (!contractId || typeof contractId !== "string") return json({ error: "contractId obrigatório" }, 400);
 
   // Verifica propriedade do contrato
   const { data: contract, error: cErr } = await sb
@@ -58,8 +53,7 @@ Deno.serve(async (req) => {
     .eq("id", contractId)
     .maybeSingle();
   if (cErr) return json({ error: cErr.message }, 500);
-  if (!contract || contract.user_id !== userId)
-    return json({ error: "Contrato não encontrado" }, 404);
+  if (!contract || contract.user_id !== userId) return json({ error: "Contrato não encontrado" }, 404);
 
   if (action === "list") {
     const { data: rows, error } = await sb
@@ -76,10 +70,8 @@ Deno.serve(async (req) => {
     if (signers.length < 1 || signers.length > 5) return json({ error: "1 a 5 signatários" }, 400);
     for (const s of signers) {
       if (!s || !ROLES.has(s.role)) return json({ error: "Papel inválido" }, 400);
-      if (typeof s.name !== "string" || s.name.trim().length < 2)
-        return json({ error: "Nome inválido" }, 400);
-      if (typeof s.email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email))
-        return json({ error: "E-mail inválido" }, 400);
+      if (typeof s.name !== "string" || s.name.trim().length < 2) return json({ error: "Nome inválido" }, 400);
+      if (typeof s.email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email)) return json({ error: "E-mail inválido" }, 400);
     }
 
     await sb.from("contract_signatures").delete().eq("contract_id", contractId);

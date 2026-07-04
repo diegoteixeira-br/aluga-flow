@@ -26,22 +26,12 @@ export async function streamImage(
   const parser = createParser({
     onEvent(event) {
       let payload: ImageEventPayload | undefined;
-      try {
-        payload = JSON.parse(event.data) as ImageEventPayload;
-      } catch {
-        /* ignore */
-      }
+      try { payload = JSON.parse(event.data) as ImageEventPayload; } catch { /* ignore */ }
       if (event.event === "error" || payload?.type === "error") {
-        streamError =
-          (payload as { error?: { message?: string } })?.error?.message ??
-          "Falha na geração da imagem";
+        streamError = (payload as { error?: { message?: string } })?.error?.message ?? "Falha na geração da imagem";
         return;
       }
-      if (
-        event.event !== "image_generation.partial_image" &&
-        event.event !== "image_generation.completed"
-      )
-        return;
+      if (event.event !== "image_generation.partial_image" && event.event !== "image_generation.completed") return;
       if (!payload) return;
       const isFinal = event.event === "image_generation.completed";
       flushSync(() => {

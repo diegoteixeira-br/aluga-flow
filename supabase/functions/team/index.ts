@@ -52,11 +52,7 @@ Deno.serve(async (req) => {
   }
 
   let payload: any = {};
-  try {
-    payload = await req.json();
-  } catch {
-    return json({ error: "Bad JSON" }, 400);
-  }
+  try { payload = await req.json(); } catch { return json({ error: "Bad JSON" }, 400); }
   const action = String(payload.action || "");
 
   try {
@@ -77,8 +73,7 @@ Deno.serve(async (req) => {
       }
       // Check plan limit
       const { data: limit, error: limErr } = await admin.rpc("check_plan_limit", {
-        _user_id: userId,
-        _resource: "users",
+        _user_id: userId, _resource: "users",
       });
       if (limErr) throw limErr;
       const l = limit as { allowed: boolean; current: number; max: number | null };
@@ -115,11 +110,7 @@ Deno.serve(async (req) => {
       const { id, full_name, password } = payload;
       if (!id) return json({ error: "id obrigatório" }, 400);
       // ensure member belongs to caller
-      const { data: m } = await admin
-        .from("profiles")
-        .select("id, parent_id")
-        .eq("id", id)
-        .maybeSingle();
+      const { data: m } = await admin.from("profiles").select("id, parent_id").eq("id", id).maybeSingle();
       if (!m || m.parent_id !== userId) return json({ error: "Forbidden" }, 403);
 
       if (full_name) {
@@ -137,11 +128,7 @@ Deno.serve(async (req) => {
     if (action === "delete") {
       const { id } = payload;
       if (!id) return json({ error: "id obrigatório" }, 400);
-      const { data: m } = await admin
-        .from("profiles")
-        .select("id, parent_id")
-        .eq("id", id)
-        .maybeSingle();
+      const { data: m } = await admin.from("profiles").select("id, parent_id").eq("id", id).maybeSingle();
       if (!m || m.parent_id !== userId) return json({ error: "Forbidden" }, 403);
       const { error } = await admin.auth.admin.deleteUser(id);
       if (error) return json({ error: error.message }, 400);
