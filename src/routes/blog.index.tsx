@@ -60,6 +60,8 @@ function BlogIndex() {
             ))}
           </div>
         )}
+        <AdSenseBlock />
+
         {pages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Anterior</Button>
