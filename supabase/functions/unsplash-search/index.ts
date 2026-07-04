@@ -20,18 +20,29 @@ Deno.serve(async (req) => {
     );
     const { data: userData } = await supabase.auth.getUser();
     if (!userData?.user) return json({ error: "Unauthorized" }, 401);
-    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
     if (!isAdmin) return json({ error: "Forbidden" }, 403);
 
     const accessKey = Deno.env.get("UNSPLASH_ACCESS_KEY");
-    if (!accessKey) return json({ error: "UNSPLASH_ACCESS_KEY não configurada. Crie uma em https://unsplash.com/developers e salve como secret." }, 500);
+    if (!accessKey)
+      return json(
+        {
+          error:
+            "UNSPLASH_ACCESS_KEY não configurada. Crie uma em https://unsplash.com/developers e salve como secret.",
+        },
+        500,
+      );
 
     const body = await req.json().catch(() => ({}));
     const action: string = body?.action ?? "search";
 
     if (action === "track_download") {
       const url: string = body?.downloadUrl ?? "";
-      if (!url || !url.startsWith("https://api.unsplash.com/")) return json({ error: "downloadUrl inválida" }, 400);
+      if (!url || !url.startsWith("https://api.unsplash.com/"))
+        return json({ error: "downloadUrl inválida" }, 400);
       const r = await fetch(url, { headers: { Authorization: `Client-ID ${accessKey}` } });
       if (!r.ok) return json({ error: `Unsplash ${r.status}` }, 500);
       return json({ ok: true });

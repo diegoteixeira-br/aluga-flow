@@ -17,7 +17,6 @@ export const LOGO_ATTACHMENT: EmailAttachment = {
   content_type: "image/png",
 };
 
-
 const baseStyle = `
   body{margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1f2937}
   .wrap{max-width:560px;margin:0 auto;padding:24px}
@@ -50,23 +49,32 @@ function layout(title: string, inner: string): string {
 export function welcomeEmail(name: string): { subject: string; html: string } {
   return {
     subject: "Bem-vindo ao AlugaFlow 🎉",
-    html: layout("Bem-vindo", `
+    html: layout(
+      "Bem-vindo",
+      `
       <h1>Olá, ${name || "proprietário"} 👋</h1>
       <p>Sua conta no <b>AlugaFlow</b> foi criada com sucesso!</p>
       <p>Agora você pode cadastrar imóveis, inquilinos, gerar contratos e automatizar cobranças via PIX e boleto.</p>
       <a class="btn" href="https://alugaflow.com.br/dashboard">Acessar painel</a>
       <p>Qualquer dúvida, basta responder este e-mail.</p>
-    `),
+    `,
+    ),
   };
 }
 
 export function leadNotificationEmail(args: {
-  ownerName: string; leadName: string; leadPhone: string; leadEmail: string;
-  propertyTitle?: string; message?: string;
+  ownerName: string;
+  leadName: string;
+  leadPhone: string;
+  leadEmail: string;
+  propertyTitle?: string;
+  message?: string;
 }): { subject: string; html: string } {
   return {
     subject: `Novo lead recebido: ${args.leadName}`,
-    html: layout("Novo lead", `
+    html: layout(
+      "Novo lead",
+      `
       <h1>📩 Você tem um novo interessado!</h1>
       <p><b>${args.leadName}</b> demonstrou interesse${args.propertyTitle ? ` no imóvel <b>${args.propertyTitle}</b>` : ""}.</p>
       <div class="box">
@@ -75,16 +83,22 @@ export function leadNotificationEmail(args: {
         ${args.message ? `<p style="margin-top:12px"><i>"${args.message}"</i></p>` : ""}
       </div>
       <a class="btn" href="https://alugaflow.com.br/dashboard">Ver no painel</a>
-    `),
+    `,
+    ),
   };
 }
 
 export function paymentReminderEmail(args: {
-  tenantName: string; amount: number; dueDate: string; invoiceUrl?: string;
+  tenantName: string;
+  amount: number;
+  dueDate: string;
+  invoiceUrl?: string;
 }): { subject: string; html: string } {
   return {
     subject: `Lembrete: aluguel vence em ${dateBR(args.dueDate)}`,
-    html: layout("Lembrete", `
+    html: layout(
+      "Lembrete",
+      `
       <h1>Olá, ${args.tenantName} 👋</h1>
       <p>Este é apenas um lembrete amigável: seu aluguel vence em <b>${dateBR(args.dueDate)}</b>.</p>
       <div class="box">
@@ -93,16 +107,22 @@ export function paymentReminderEmail(args: {
       </div>
       ${args.invoiceUrl ? `<a class="btn" href="${args.invoiceUrl}">Pagar agora (PIX/Boleto)</a>` : ""}
       <p>Se já efetuou o pagamento, por favor desconsidere este aviso.</p>
-    `),
+    `,
+    ),
   };
 }
 
 export function paymentReceiptEmail(args: {
-  tenantName: string; amount: number; referenceMonth?: string; paidAt?: string;
+  tenantName: string;
+  amount: number;
+  referenceMonth?: string;
+  paidAt?: string;
 }): { subject: string; html: string } {
   return {
     subject: "Recibo de pagamento confirmado ✅",
-    html: layout("Recibo", `
+    html: layout(
+      "Recibo",
+      `
       <h1>Pagamento recebido!</h1>
       <p>Olá, ${args.tenantName}. Confirmamos o recebimento do seu pagamento. Obrigado!</p>
       <div class="box">
@@ -111,16 +131,23 @@ export function paymentReceiptEmail(args: {
         ${args.paidAt ? `<div class="row"><span>Pago em</span><b>${dateBR(args.paidAt)}</b></div>` : ""}
       </div>
       <p>Este e-mail serve como recibo simplificado.</p>
-    `),
+    `,
+    ),
   };
 }
 
 export function paymentOverdueEmail(args: {
-  tenantName: string; amount: number; dueDate: string; invoiceUrl?: string; daysLate: number;
+  tenantName: string;
+  amount: number;
+  dueDate: string;
+  invoiceUrl?: string;
+  daysLate: number;
 }): { subject: string; html: string } {
   return {
     subject: `Aviso: aluguel em atraso (${args.daysLate} ${args.daysLate === 1 ? "dia" : "dias"})`,
-    html: layout("Atraso", `
+    html: layout(
+      "Atraso",
+      `
       <h1>⚠️ Identificamos um pagamento em atraso</h1>
       <p>Olá, ${args.tenantName}. Seu aluguel com vencimento em <b>${dateBR(args.dueDate)}</b> ainda consta como não pago.</p>
       <div class="box late">
@@ -130,7 +157,8 @@ export function paymentOverdueEmail(args: {
       </div>
       ${args.invoiceUrl ? `<a class="btn" href="${args.invoiceUrl}">Regularizar pagamento</a>` : ""}
       <p>Caso o pagamento já tenha sido realizado, por favor desconsidere.</p>
-    `),
+    `,
+    ),
   };
 }
 
@@ -138,7 +166,10 @@ export function paymentOverdueEmail(args: {
  * Substitui variáveis no formato {{nome}} pelos dados do destinatário.
  * Suporta: {{nome}}, {{primeiro_nome}}, {{email}}, {{plano}}.
  */
-export function personalize(text: string, vars: { name?: string | null; email?: string | null; plan?: string | null }): string {
+export function personalize(
+  text: string,
+  vars: { name?: string | null; email?: string | null; plan?: string | null },
+): string {
   const name = (vars.name || "").trim();
   const first = name.split(/\s+/)[0] || "";
   const map: Record<string, string> = {
@@ -147,7 +178,10 @@ export function personalize(text: string, vars: { name?: string | null; email?: 
     email: vars.email || "",
     plano: vars.plan || "",
   };
-  return text.replace(/\{\{\s*(nome|primeiro_nome|email|plano)\s*\}\}/gi, (_, k) => map[k.toLowerCase()] ?? "");
+  return text.replace(
+    /\{\{\s*(nome|primeiro_nome|email|plano)\s*\}\}/gi,
+    (_, k) => map[k.toLowerCase()] ?? "",
+  );
 }
 
 export function broadcastEmail(
@@ -159,9 +193,13 @@ export function broadcastEmail(
   const safeBody = personalized.replace(/\n/g, "<br/>");
   // Só adiciona saudação automática quando o corpo NÃO começa com uma saudação
   // (evita duplicar "Olá, Diego" + "Olá, equipe" quando o autor já cumprimentou).
-  const startsWithGreeting = /^\s*(olá|ola|oi|prezad|caro|bom dia|boa tarde|boa noite)/i.test(personalized);
-  const greetName = vars?.name ? (vars.name.split(/\s+/)[0]) : "";
-  const hello = !startsWithGreeting && greetName ? `<p style="margin-top:0">Olá, <b>${greetName}</b> 👋</p>` : "";
+  const startsWithGreeting = /^\s*(olá|ola|oi|prezad|caro|bom dia|boa tarde|boa noite)/i.test(
+    personalized,
+  );
+  const greetName = vars?.name ? vars.name.split(/\s+/)[0] : "";
+  const hello =
+    !startsWithGreeting && greetName
+      ? `<p style="margin-top:0">Olá, <b>${greetName}</b> 👋</p>`
+      : "";
   return layout(subject, `<h1>${subject}</h1>${hello}<p>${safeBody}</p>`);
 }
-

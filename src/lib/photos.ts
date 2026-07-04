@@ -71,9 +71,7 @@ export async function uploadPropertyPhoto(params: {
 
 export async function getSignedUrls(paths: string[]): Promise<Record<string, string>> {
   if (paths.length === 0) return {};
-  const { data, error } = await supabase.storage
-    .from(PHOTO_BUCKET)
-    .createSignedUrls(paths, 3600);
+  const { data, error } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, 3600);
   if (error) throw error;
   const map: Record<string, string> = {};
   data?.forEach((d) => {

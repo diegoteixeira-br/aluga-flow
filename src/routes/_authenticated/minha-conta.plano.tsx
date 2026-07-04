@@ -7,15 +7,30 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Check, Sparkles, Crown, ArrowUp, ArrowDown, Building2, Calendar } from "lucide-react";
 import { formatBRL, formatDate } from "@/lib/format";
-import { getMySubscription, createCheckoutSession, scheduleDowngrade } from "@/lib/subscriptions.functions";
+import {
+  getMySubscription,
+  createCheckoutSession,
+  scheduleDowngrade,
+} from "@/lib/subscriptions.functions";
 import { CancelSubscriptionDialog } from "@/components/cancel-subscription-dialog";
 import { useMyPlan } from "@/components/plan-limit-guard";
 import { ShieldAlert } from "lucide-react";
@@ -33,9 +48,21 @@ export const Route = createFileRoute("/_authenticated/minha-conta/plano")({
 const RANK: Record<string, number> = { free: 0, investidor: 1, imobiliaria: 2 };
 
 const PLAN_BADGE: Record<string, { label: string; cls: string; icon: typeof Sparkles }> = {
-  free: { label: "Gratuito", cls: "bg-slate-200 text-slate-700 hover:bg-slate-200", icon: Building2 },
-  investidor: { label: "Investidor", cls: "bg-primary text-primary-foreground hover:bg-primary", icon: Sparkles },
-  imobiliaria: { label: "Imobiliária", cls: "bg-amber-500 text-white hover:bg-amber-500", icon: Crown },
+  free: {
+    label: "Gratuito",
+    cls: "bg-slate-200 text-slate-700 hover:bg-slate-200",
+    icon: Building2,
+  },
+  investidor: {
+    label: "Investidor",
+    cls: "bg-primary text-primary-foreground hover:bg-primary",
+    icon: Sparkles,
+  },
+  imobiliaria: {
+    label: "Imobiliária",
+    cls: "bg-amber-500 text-white hover:bg-amber-500",
+    icon: Crown,
+  },
 };
 
 function PlanPage() {
@@ -100,12 +127,17 @@ function PlanPage() {
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><ShieldAlert className="h-5 w-5 text-amber-600" /> Acesso restrito</CardTitle>
-            <CardDescription>O gerenciamento de plano está disponível apenas para o dono da conta.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600" /> Acesso restrito
+            </CardTitle>
+            <CardDescription>
+              O gerenciamento de plano está disponível apenas para o dono da conta.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Você está acessando como membro de equipe. Para alterar o plano, entre em contato com o administrador da conta.
+              Você está acessando como membro de equipe. Para alterar o plano, entre em contato com
+              o administrador da conta.
             </p>
           </CardContent>
         </Card>
@@ -118,7 +150,9 @@ function PlanPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Meu plano</h1>
-        <p className="text-sm text-muted-foreground">Gerencie sua assinatura, faça upgrade ou downgrade.</p>
+        <p className="text-sm text-muted-foreground">
+          Gerencie sua assinatura, faça upgrade ou downgrade.
+        </p>
       </div>
 
       {/* Current plan summary */}
@@ -153,7 +187,9 @@ function PlanPage() {
             )}
             {sub?.status === "scheduled_downgrade" && sub.scheduled_plan && (
               <p className="rounded-md bg-amber-50 px-3 py-2 text-amber-800 text-xs">
-                Downgrade agendado para <strong>{PLAN_BADGE[sub.scheduled_plan]?.label ?? sub.scheduled_plan}</strong> ao fim do período.
+                Downgrade agendado para{" "}
+                <strong>{PLAN_BADGE[sub.scheduled_plan]?.label ?? sub.scheduled_plan}</strong> ao
+                fim do período.
               </p>
             )}
             {sub?.status === "past_due" && (
@@ -163,7 +199,11 @@ function PlanPage() {
             )}
           </div>
           <div className="space-y-3">
-            <UsageBar label="Imóveis cadastrados" current={data.usage.properties} max={limits.properties} />
+            <UsageBar
+              label="Imóveis cadastrados"
+              current={data.usage.properties}
+              max={limits.properties}
+            />
             <UsageBar label="Anúncios ativos" current={data.usage.listings} max={limits.listings} />
           </div>
         </CardContent>
@@ -178,7 +218,8 @@ function PlanPage() {
             const isUpgrade = RANK[p.id] > RANK[currentPlan];
             const isDowngrade = RANK[p.id] < RANK[currentPlan];
             const benefits = Array.isArray(p.benefits) ? (p.benefits as string[]) : [];
-            const promoActive = p.promo_price && p.promo_until && new Date(p.promo_until) > new Date();
+            const promoActive =
+              p.promo_price && p.promo_until && new Date(p.promo_until) > new Date();
             const price = promoActive ? p.promo_price : p.price;
             return (
               <Card key={p.id} className={isCurrent ? "border-primary shadow-md" : ""}>
@@ -195,7 +236,9 @@ function PlanPage() {
                         <span className="text-3xl font-bold">{formatBRL(price)}</span>
                         <span className="text-sm text-muted-foreground">/mês</span>
                         {promoActive && (
-                          <span className="ml-2 text-sm text-muted-foreground line-through">{formatBRL(p.price)}</span>
+                          <span className="ml-2 text-sm text-muted-foreground line-through">
+                            {formatBRL(p.price)}
+                          </span>
                         )}
                       </div>
                     )}
@@ -211,7 +254,9 @@ function PlanPage() {
                     ))}
                   </ul>
                   {isCurrent ? (
-                    <Button disabled variant="outline" className="w-full">Plano atual</Button>
+                    <Button disabled variant="outline" className="w-full">
+                      Plano atual
+                    </Button>
                   ) : isUpgrade ? (
                     <Button
                       className="w-full"
@@ -222,7 +267,11 @@ function PlanPage() {
                       {upgradeMut.isPending ? "Redirecionando…" : "Fazer upgrade"}
                     </Button>
                   ) : isDowngrade ? (
-                    <Button variant="outline" className="w-full" onClick={() => setDowngradePlan(p.id)}>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setDowngradePlan(p.id)}
+                    >
                       <ArrowDown className="h-4 w-4" />
                       Fazer downgrade
                     </Button>
@@ -240,12 +289,16 @@ function PlanPage() {
           <CardHeader>
             <CardTitle className="text-base">Cancelar assinatura</CardTitle>
             <CardDescription>
-              Você manterá acesso aos recursos pagos até o fim do período atual.
-              Após isso, sua conta volta para o plano Gratuito automaticamente.
+              Você manterá acesso aos recursos pagos até o fim do período atual. Após isso, sua
+              conta volta para o plano Gratuito automaticamente.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setCancelOpen(true)}>
+            <Button
+              variant="ghost"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => setCancelOpen(true)}
+            >
               Cancelar minha assinatura
             </Button>
           </CardContent>
@@ -275,13 +328,16 @@ function PlanPage() {
             <AlertDialogTitle>Confirmar downgrade</AlertDialogTitle>
             <AlertDialogDescription>
               Tem certeza? Você perderá acesso a recursos do plano <strong>{badge.label}</strong>.
-              Seu plano muda ao final do período pago atual e você continua usando os recursos atuais até lá.
+              Seu plano muda ao final do período pago atual e você continua usando os recursos
+              atuais até lá.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Voltar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => downgradePlan && downgradeMut.mutate(downgradePlan as "free" | "investidor")}
+              onClick={() =>
+                downgradePlan && downgradeMut.mutate(downgradePlan as "free" | "investidor")
+              }
             >
               Confirmar downgrade
             </AlertDialogAction>

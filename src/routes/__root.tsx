@@ -50,12 +50,17 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">Tente novamente em instantes.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             Tentar novamente
           </button>
-          <a href="/" className="rounded-md border bg-background px-4 py-2 text-sm">Ir ao início</a>
+          <a href="/" className="rounded-md border bg-background px-4 py-2 text-sm">
+            Ir ao início
+          </a>
         </div>
       </div>
     </div>
@@ -68,9 +73,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "AlugaFlow — Gestão de aluguéis para proprietários" },
-      { name: "description", content: "Controle imóveis, inquilinos, contratos e recebimentos em um só lugar." },
+      {
+        name: "description",
+        content: "Controle imóveis, inquilinos, contratos e recebimentos em um só lugar.",
+      },
       { property: "og:title", content: "AlugaFlow" },
-      { property: "og:description", content: "Gestão imobiliária para proprietários independentes." },
+      {
+        property: "og:description",
+        content: "Gestão imobiliária para proprietários independentes.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "AlugaFlow" },
       { property: "og:image", content: "https://alugaflow.com.br/favicon.png" },
@@ -81,7 +92,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:alt", content: "AlugaFlow" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "AlugaFlow" },
-      { name: "twitter:description", content: "Gestão imobiliária para proprietários independentes." },
+      {
+        name: "twitter:description",
+        content: "Gestão imobiliária para proprietários independentes.",
+      },
       { name: "twitter:image", content: "https://alugaflow.com.br/favicon.png" },
     ],
     links: [
@@ -99,8 +113,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
-      <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
     </html>
   );
 }

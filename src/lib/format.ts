@@ -5,7 +5,8 @@ export const formatBRL = (value: number | string | null | undefined) => {
 
 export const formatDate = (value: string | Date | null | undefined) => {
   if (!value) return "—";
-  const d = typeof value === "string" ? new Date(value + (value.length === 10 ? "T00:00:00" : "")) : value;
+  const d =
+    typeof value === "string" ? new Date(value + (value.length === 10 ? "T00:00:00" : "")) : value;
   if (isNaN(d.getTime())) return "—";
   return d.toLocaleDateString("pt-BR");
 };

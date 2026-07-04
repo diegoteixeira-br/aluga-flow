@@ -3,7 +3,13 @@ import { ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedUrls } from "@/lib/photos";
 
-export function PropertyCover({ propertyId, className = "h-12 w-16" }: { propertyId: string; className?: string }) {
+export function PropertyCover({
+  propertyId,
+  className = "h-12 w-16",
+}: {
+  propertyId: string;
+  className?: string;
+}) {
   const { data: url } = useQuery({
     queryKey: ["property-cover", propertyId],
     queryFn: async () => {
@@ -21,7 +27,9 @@ export function PropertyCover({ propertyId, className = "h-12 w-16" }: { propert
   });
 
   return (
-    <div className={`${className} overflow-hidden rounded-md border bg-muted flex items-center justify-center`}>
+    <div
+      className={`${className} overflow-hidden rounded-md border bg-muted flex items-center justify-center`}
+    >
       {url ? (
         <img src={url} alt="Capa do imóvel" className="h-full w-full object-cover" />
       ) : (

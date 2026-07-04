@@ -51,7 +51,10 @@ Deno.serve(async (req) => {
     );
     const { data: userData } = await supabase.auth.getUser();
     if (!userData?.user) return json({ error: "Unauthorized" }, 401);
-    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
     if (!isAdmin) return json({ error: "Forbidden" }, 403);
 
     const key = Deno.env.get("LOVABLE_API_KEY");
@@ -70,7 +73,6 @@ Deno.serve(async (req) => {
       const parsed = safeJson(r);
       return json({ titles: parsed?.titles ?? [] });
     }
-
 
     if (action === "generate_article") {
       const title: string = (body?.title ?? "").toString().trim();
@@ -91,14 +93,18 @@ Retorne EXATAMENTE: {"title":"...","slug":"...","excerpt":"...","content":"..."}
       const parsed = safeJson(r);
       if (!parsed?.content) return json({ error: "Falha ao gerar artigo" }, 500);
 
-      const finalTitle = (parsed.title && String(parsed.title).trim().length >= 20)
-        ? String(parsed.title).trim()
-        : title;
-      const finalSlug = parsed.slug && String(parsed.slug).match(/^[a-z0-9-]{3,}$/)
-        ? String(parsed.slug)
-        : slugify(finalTitle);
+      const finalTitle =
+        parsed.title && String(parsed.title).trim().length >= 20
+          ? String(parsed.title).trim()
+          : title;
+      const finalSlug =
+        parsed.slug && String(parsed.slug).match(/^[a-z0-9-]{3,}$/)
+          ? String(parsed.slug)
+          : slugify(finalTitle);
       const finalContent = stripLeadingH1(String(parsed.content));
-      const finalExcerpt = String(parsed.excerpt || "").slice(0, 150).trim();
+      const finalExcerpt = String(parsed.excerpt || "")
+        .slice(0, 150)
+        .trim();
 
       return json({
         title: finalTitle,
@@ -137,9 +143,19 @@ async function callAI(key: string, system: string, user: string, jsonMode: boole
 
 function safeJson(s: string): any {
   if (!s) return null;
-  try { return JSON.parse(s); } catch { /* try to extract */ }
+  try {
+    return JSON.parse(s);
+  } catch {
+    /* try to extract */
+  }
   const m = s.match(/\{[\s\S]*\}/);
-  if (m) { try { return JSON.parse(m[0]); } catch { return null; } }
+  if (m) {
+    try {
+      return JSON.parse(m[0]);
+    } catch {
+      return null;
+    }
+  }
   return null;
 }
 

@@ -19,7 +19,9 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function onlyDigits(s: string) { return s.replace(/\D+/g, ""); }
+function onlyDigits(s: string) {
+  return s.replace(/\D+/g, "");
+}
 function isValidCPF(cpf: string): boolean {
   const c = onlyDigits(cpf);
   if (c.length !== 11 || /^(\d)\1+$/.test(c)) return false;
@@ -33,11 +35,9 @@ function isValidCPF(cpf: string): boolean {
 }
 
 function admin() {
-  return createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { autoRefreshToken: false, persistSession: false } },
-  );
+  return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 async function getContractView(token: string) {
@@ -52,21 +52,25 @@ async function getContractView(token: string) {
 
   const { data: contract } = await sb
     .from("contracts")
-    .select(`
+    .select(
+      `
       id, user_id, contract_type, start_date, end_date, rent_amount, due_day,
       adjustment_index, adjustment_frequency_months, guarantee_type, guarantee_months,
       extra_charges, notes, deposit_amount,
       guarantor_name, guarantor_cpf, guarantor_rg, guarantor_email, guarantor_phone, guarantor_address,
       property:properties(nickname,address,city,state,zip_code,type,bedrooms,area_m2),
       tenant:tenants(full_name,cpf,rg,email,phone,address_street,address_number,address_neighborhood,address_city,address_state)
-    `)
+    `,
+    )
     .eq("id", sig.contract_id)
     .maybeSingle();
   if (!contract) return null;
 
   const { data: ownerProfile } = await sb
     .from("profiles")
-    .select("full_name, cpf, phone, address_street, address_number, address_neighborhood, address_city, address_uf, address_zip, bank_name, bank_agency, bank_account, pix_key")
+    .select(
+      "full_name, cpf, phone, address_street, address_number, address_neighborhood, address_city, address_uf, address_zip, bank_name, bank_agency, bank_account, pix_key",
+    )
     .eq("id", contract.user_id)
     .maybeSingle();
 
@@ -91,13 +95,19 @@ Deno.serve(async (req) => {
       const view = await getContractView(token);
       if (!view) return json({ error: "invalid token" }, 404);
       return json(view);
-    } catch (e) { return json({ error: (e as Error).message }, 500); }
+    } catch (e) {
+      return json({ error: (e as Error).message }, 500);
+    }
   }
 
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   let body: any = {};
-  try { body = await req.json(); } catch { return json({ error: "invalid body" }, 400); }
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "invalid body" }, 400);
+  }
 
   const token = (body.token ?? "") as string;
   const name = ((body.signed_name ?? "") as string).trim();
@@ -118,7 +128,12 @@ Deno.serve(async (req) => {
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || null;
   const { error: uErr } = await sb
     .from("contract_signatures")
-    .update({ signed_name: name, signed_cpf: cpf, signed_at: new Date().toISOString(), signer_ip: ip })
+    .update({
+      signed_name: name,
+      signed_cpf: cpf,
+      signed_at: new Date().toISOString(),
+      signer_ip: ip,
+    })
     .eq("id", sig.id);
   if (uErr) return json({ error: uErr.message }, 500);
 
@@ -129,13 +144,12 @@ Deno.serve(async (req) => {
   const total = all?.length ?? 0;
   const done = (all ?? []).filter((x) => x.signed_at).length;
   if (total > 0 && done === total) {
-    await sb.from("contracts")
+    await sb
+      .from("contracts")
       .update({ signature_status: "assinado", signed_at: new Date().toISOString() })
       .eq("id", sig.contract_id);
   } else if (done > 0) {
-    await sb.from("contracts")
-      .update({ signature_status: "parcial" })
-      .eq("id", sig.contract_id);
+    await sb.from("contracts").update({ signature_status: "parcial" }).eq("id", sig.contract_id);
   }
 
   return json({ ok: true, completed: done === total });

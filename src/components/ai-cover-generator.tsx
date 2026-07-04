@@ -1,9 +1,22 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { streamImage } from "@/lib/stream-image";
@@ -16,11 +29,19 @@ type Style = "foto" | "ilustracao" | "minimalista";
 
 const styleHints: Record<Style, string> = {
   foto: "Fotografia profissional editorial, iluminação natural, alta nitidez, cores realistas, proporção 16:9",
-  ilustracao: "Ilustração digital moderna, traços limpos, paleta vibrante mas elegante, estilo editorial, proporção 16:9",
-  minimalista: "Composição minimalista, fundo neutro, poucos elementos, design clean e moderno, proporção 16:9",
+  ilustracao:
+    "Ilustração digital moderna, traços limpos, paleta vibrante mas elegante, estilo editorial, proporção 16:9",
+  minimalista:
+    "Composição minimalista, fundo neutro, poucos elementos, design clean e moderno, proporção 16:9",
 };
 
-export function AiCoverGenerator({ title, onCoverReady }: { title?: string; onCoverReady: (url: string) => void }) {
+export function AiCoverGenerator({
+  title,
+  onCoverReady,
+}: {
+  title?: string;
+  onCoverReady: (url: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [style, setStyle] = useState<Style>("foto");
   const [prompt, setPrompt] = useState("");
@@ -50,7 +71,12 @@ export function AiCoverGenerator({ title, onCoverReady }: { title?: string; onCo
           setB64(data);
           if (final) setIsFinal(true);
         },
-        token ? { Authorization: `Bearer ${token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } : undefined,
+        token
+          ? {
+              Authorization: `Bearer ${token}`,
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            }
+          : undefined,
       );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao gerar imagem");
@@ -85,12 +111,16 @@ export function AiCoverGenerator({ title, onCoverReady }: { title?: string; onCo
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
-        <DialogHeader><DialogTitle>Gerar capa com IA</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Gerar capa com IA</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div>
             <Label>Estilo</Label>
             <Select value={style} onValueChange={(v) => setStyle(v as Style)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="foto">Fotografia</SelectItem>
                 <SelectItem value="ilustracao">Ilustração</SelectItem>
@@ -106,7 +136,9 @@ export function AiCoverGenerator({ title, onCoverReady }: { title?: string; onCo
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
             />
-            <p className="mt-1 text-xs text-muted-foreground">Descreva a cena, estilo, cores e clima desejados em português.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Descreva a cena, estilo, cores e clima desejados em português.
+            </p>
           </div>
 
           {b64 && (
@@ -125,12 +157,38 @@ export function AiCoverGenerator({ title, onCoverReady }: { title?: string; onCo
           )}
         </div>
         <DialogFooter className="gap-2">
-          <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={streaming || saving}>Fechar</Button>
-          <Button type="button" variant="secondary" onClick={generate} disabled={streaming || saving}>
-            {streaming ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando</> : b64 ? "Gerar outra" : "Gerar"}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={streaming || saving}
+          >
+            Fechar
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={generate}
+            disabled={streaming || saving}
+          >
+            {streaming ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando
+              </>
+            ) : b64 ? (
+              "Gerar outra"
+            ) : (
+              "Gerar"
+            )}
           </Button>
           <Button type="button" onClick={use} disabled={!b64 || !isFinal || saving || streaming}>
-            {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando</> : "Usar esta capa"}
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando
+              </>
+            ) : (
+              "Usar esta capa"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

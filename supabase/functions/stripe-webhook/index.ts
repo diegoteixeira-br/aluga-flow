@@ -24,7 +24,11 @@ function timingSafeEq(a: string, b: string): boolean {
   return r === 0;
 }
 
-async function verifyStripeSig(payload: string, header: string | null, secret: string): Promise<boolean> {
+async function verifyStripeSig(
+  payload: string,
+  header: string | null,
+  secret: string,
+): Promise<boolean> {
   if (!header) return false;
   const parts: Record<string, string> = {};
   for (const seg of header.split(",")) {
@@ -66,22 +70,26 @@ async function handleEvent(event: StripeEvent, admin: any) {
       });
       if (r.ok) {
         const s: any = await r.json();
-        if (s.current_period_start) periodStart = new Date(s.current_period_start * 1000).toISOString();
+        if (s.current_period_start)
+          periodStart = new Date(s.current_period_start * 1000).toISOString();
         if (s.current_period_end) periodEnd = new Date(s.current_period_end * 1000).toISOString();
       }
     }
 
-    await admin.from("subscriptions").upsert({
-      user_id: userId,
-      plan_type: planType,
-      stripe_subscription_id: subId ?? null,
-      stripe_customer_id: customerId ?? null,
-      status: "active",
-      current_period_start: periodStart,
-      current_period_end: periodEnd,
-      cancel_at_period_end: false,
-      scheduled_plan: null,
-    }, { onConflict: "stripe_subscription_id" });
+    await admin.from("subscriptions").upsert(
+      {
+        user_id: userId,
+        plan_type: planType,
+        stripe_subscription_id: subId ?? null,
+        stripe_customer_id: customerId ?? null,
+        status: "active",
+        current_period_start: periodStart,
+        current_period_end: periodEnd,
+        cancel_at_period_end: false,
+        scheduled_plan: null,
+      },
+      { onConflict: "stripe_subscription_id" },
+    );
     await admin.from("profiles").update({ plan: planType }).eq("id", userId);
     return;
   }
@@ -90,28 +98,42 @@ async function handleEvent(event: StripeEvent, admin: any) {
     const subId = obj.id as string;
     const status = obj.status as string;
     const cancelAtEnd = obj.cancel_at_period_end as boolean;
-    const periodStart = obj.current_period_start ? new Date((obj.current_period_start as number) * 1000).toISOString() : null;
-    const periodEnd = obj.current_period_end ? new Date((obj.current_period_end as number) * 1000).toISOString() : null;
-    await admin.from("subscriptions").update({
-      status: status === "past_due" ? "past_due" : (cancelAtEnd ? "scheduled_downgrade" : "active"),
-      cancel_at_period_end: cancelAtEnd,
-      current_period_start: periodStart,
-      current_period_end: periodEnd,
-    }).eq("stripe_subscription_id", subId);
+    const periodStart = obj.current_period_start
+      ? new Date((obj.current_period_start as number) * 1000).toISOString()
+      : null;
+    const periodEnd = obj.current_period_end
+      ? new Date((obj.current_period_end as number) * 1000).toISOString()
+      : null;
+    await admin
+      .from("subscriptions")
+      .update({
+        status: status === "past_due" ? "past_due" : cancelAtEnd ? "scheduled_downgrade" : "active",
+        cancel_at_period_end: cancelAtEnd,
+        current_period_start: periodStart,
+        current_period_end: periodEnd,
+      })
+      .eq("stripe_subscription_id", subId);
     return;
   }
 
   if (event.type === "customer.subscription.deleted") {
     const subId = obj.id as string;
-    const { data: sub } = await admin.from("subscriptions").select("user_id, scheduled_plan").eq("stripe_subscription_id", subId).maybeSingle();
+    const { data: sub } = await admin
+      .from("subscriptions")
+      .select("user_id, scheduled_plan")
+      .eq("stripe_subscription_id", subId)
+      .maybeSingle();
     if (!sub) return;
     const newPlan = sub.scheduled_plan ?? "free";
-    await admin.from("subscriptions").update({
-      status: "cancelled",
-      plan_type: newPlan,
-      cancel_at_period_end: false,
-      scheduled_plan: null,
-    }).eq("stripe_subscription_id", subId);
+    await admin
+      .from("subscriptions")
+      .update({
+        status: "cancelled",
+        plan_type: newPlan,
+        cancel_at_period_end: false,
+        scheduled_plan: null,
+      })
+      .eq("stripe_subscription_id", subId);
     await admin.from("profiles").update({ plan: newPlan }).eq("id", sub.user_id);
     return;
   }
@@ -119,7 +141,10 @@ async function handleEvent(event: StripeEvent, admin: any) {
   if (event.type === "invoice.payment_failed") {
     const subId = obj.subscription as string | undefined;
     if (!subId) return;
-    await admin.from("subscriptions").update({ status: "past_due" }).eq("stripe_subscription_id", subId);
+    await admin
+      .from("subscriptions")
+      .update({ status: "past_due" })
+      .eq("stripe_subscription_id", subId);
     return;
   }
 }
@@ -137,7 +162,11 @@ Deno.serve(async (req) => {
   }
 
   let event: StripeEvent;
-  try { event = JSON.parse(body); } catch { return new Response("Bad JSON", { status: 400 }); }
+  try {
+    event = JSON.parse(body);
+  } catch {
+    return new Response("Bad JSON", { status: 400 });
+  }
 
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,

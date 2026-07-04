@@ -64,14 +64,22 @@ Deno.serve(async (req) => {
   const userId = userData.user.id;
 
   let payload: any = {};
-  try { payload = await req.json(); } catch { /* aceita corpo vazio */ }
+  try {
+    payload = await req.json();
+  } catch {
+    /* aceita corpo vazio */
+  }
   const action = String(payload.action || "delete_account");
 
   if (action !== "delete_account") return json({ error: `Unknown action: ${action}` }, 400);
 
   try {
     for (const bucket of BUCKETS) {
-      try { await deleteUserFolder(sb, bucket, userId); } catch (_e) { /* best-effort */ }
+      try {
+        await deleteUserFolder(sb, bucket, userId);
+      } catch (_e) {
+        /* best-effort */
+      }
     }
     const { error } = await sb.rpc("delete_my_account");
     if (error) throw new Error(error.message);

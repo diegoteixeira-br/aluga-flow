@@ -10,12 +10,15 @@ async function invoke<T>(body: Record<string, unknown>): Promise<T> {
   if (error) {
     let msg = error.message || "Falha ao chamar subscriptions";
     try {
-      const ctx = (error as unknown as { context?: { json?: () => Promise<{ error?: string }> } }).context;
+      const ctx = (error as unknown as { context?: { json?: () => Promise<{ error?: string }> } })
+        .context;
       if (ctx && typeof ctx.json === "function") {
         const j = await ctx.json();
         if (j?.error) msg = j.error;
       }
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
     throw new Error(msg);
   }
   if (data && typeof data === "object" && "error" in data && (data as { error?: string }).error) {
@@ -73,5 +76,8 @@ export async function scheduleDowngrade(args: { data: { newPlan: PlanId } }) {
 }
 
 export async function cancelSubscription(args: { data: { reason: string } }) {
-  return invoke<{ ok: true; effectiveDate: string }>({ action: "cancel", reason: args.data.reason });
+  return invoke<{ ok: true; effectiveDate: string }>({
+    action: "cancel",
+    reason: args.data.reason,
+  });
 }

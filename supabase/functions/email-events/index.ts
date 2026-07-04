@@ -8,17 +8,23 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { sendEmail } from "../_shared/resend.ts";
 import {
-  welcomeEmail, leadNotificationEmail, paymentReceiptEmail, LOGO_ATTACHMENT,
+  welcomeEmail,
+  leadNotificationEmail,
+  paymentReceiptEmail,
+  LOGO_ATTACHMENT,
 } from "../_shared/email-templates.ts";
-
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-webhook-secret",
 };
 
 function json(b: unknown, s = 200) {
-  return new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
+  return new Response(JSON.stringify(b), {
+    status: s,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
 }
 
 Deno.serve(async (req) => {
@@ -36,7 +42,11 @@ Deno.serve(async (req) => {
   );
 
   let payload: any;
-  try { payload = await req.json(); } catch { return json({ error: "Bad JSON" }, 400); }
+  try {
+    payload = await req.json();
+  } catch {
+    return json({ error: "Bad JSON" }, 400);
+  }
 
   const table = String(payload?.table || "");
   const type = String(payload?.type || ""); // INSERT | UPDATE | DELETE
@@ -61,10 +71,18 @@ Deno.serve(async (req) => {
       const { data: u } = await sb.auth.admin.getUserById(ownerId);
       const ownerEmail = u?.user?.email;
       if (!ownerEmail) return json({ skipped: "no owner email" });
-      const { data: prof } = await sb.from("profiles").select("full_name").eq("id", ownerId).single();
+      const { data: prof } = await sb
+        .from("profiles")
+        .select("full_name")
+        .eq("id", ownerId)
+        .single();
       let propertyTitle: string | undefined;
       if (rec.property_id) {
-        const { data: p } = await sb.from("properties").select("title").eq("id", rec.property_id).single();
+        const { data: p } = await sb
+          .from("properties")
+          .select("title")
+          .eq("id", rec.property_id)
+          .single();
         propertyTitle = p?.title;
       }
       const tpl = leadNotificationEmail({
@@ -75,7 +93,12 @@ Deno.serve(async (req) => {
         propertyTitle,
         message: rec.message || rec.notes || "",
       });
-      const r = await sendEmail({ to: ownerEmail, ...tpl, replyTo: rec.email || undefined, attachments: [LOGO_ATTACHMENT] });
+      const r = await sendEmail({
+        to: ownerEmail,
+        ...tpl,
+        replyTo: rec.email || undefined,
+        attachments: [LOGO_ATTACHMENT],
+      });
       return json({ ok: true, kind: "lead", id: r.id, error: r.error });
     }
 
@@ -86,9 +109,11 @@ Deno.serve(async (req) => {
       if (wasPaid || !isPaid) return json({ skipped: "no status change" });
       if (rec.receipt_sent_at) return json({ skipped: "already sent" });
 
-      const { data: contract } = await sb.from("contracts")
+      const { data: contract } = await sb
+        .from("contracts")
         .select("tenant:tenants(full_name, email)")
-        .eq("id", rec.contract_id).single();
+        .eq("id", rec.contract_id)
+        .single();
       const tenant = (contract as any)?.tenant;
       if (!tenant?.email) return json({ skipped: "no tenant email" });
 
@@ -99,7 +124,11 @@ Deno.serve(async (req) => {
         paidAt: rec.paid_at || new Date().toISOString(),
       });
       const r = await sendEmail({ to: tenant.email, ...tpl, attachments: [LOGO_ATTACHMENT] });
-      if (r.id) await sb.from("payments").update({ receipt_sent_at: new Date().toISOString() }).eq("id", rec.id);
+      if (r.id)
+        await sb
+          .from("payments")
+          .update({ receipt_sent_at: new Date().toISOString() })
+          .eq("id", rec.id);
       return json({ ok: true, kind: "receipt", id: r.id, error: r.error });
     }
 

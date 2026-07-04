@@ -51,7 +51,11 @@ export function AiArticleGeneratorButton({
 
   return (
     <Button type="button" variant="outline" size="sm" onClick={generate} disabled={loading}>
-      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+      {loading ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Wand2 className="mr-2 h-4 w-4" />
+      )}
       Gerar artigo com IA
     </Button>
   );

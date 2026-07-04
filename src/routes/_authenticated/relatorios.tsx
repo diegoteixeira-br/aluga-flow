@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatBRL, formatDate } from "@/lib/format";
 
@@ -42,7 +49,9 @@ function ReportsPage() {
       const [paymentsRes, expensesRes] = await Promise.all([
         supabase
           .from("payments")
-          .select("paid_date, paid_amount, amount, status, contract:contracts(property:properties(nickname), tenant:tenants(full_name))")
+          .select(
+            "paid_date, paid_amount, amount, status, contract:contracts(property:properties(nickname), tenant:tenants(full_name))",
+          )
           .gte("paid_date", from)
           .lte("paid_date", to)
           .eq("status", "pago"),
@@ -90,11 +99,15 @@ function ReportsPage() {
     lines.push("");
     lines.push(["", "", "Total receitas", data.receitas.toFixed(2).replace(".", ",")].join(";"));
     lines.push(["", "", "Total despesas", data.despesas.toFixed(2).replace(".", ",")].join(";"));
-    lines.push(["", "", "Saldo", (data.receitas - data.despesas).toFixed(2).replace(".", ",")].join(";"));
+    lines.push(
+      ["", "", "Saldo", (data.receitas - data.despesas).toFixed(2).replace(".", ",")].join(";"),
+    );
     const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `relatorio-${from}_${to}.csv`; a.click();
+    a.href = url;
+    a.download = `relatorio-${from}_${to}.csv`;
+    a.click();
     URL.revokeObjectURL(url);
   }
 
@@ -107,57 +120,135 @@ function ReportsPage() {
 
       <Card>
         <CardContent className="flex flex-wrap items-end gap-4 p-4">
-          <div className="space-y-1"><Label>De</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
-          <div className="space-y-1"><Label>Até</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
-          <div className="flex gap-2">
-            <Button type="button" size="sm" variant="ghost" onClick={() => {
-              const n = new Date();
-              setFrom(new Date(n.getFullYear(), n.getMonth(), 1).toISOString().slice(0, 10));
-              setTo(new Date(n.getFullYear(), n.getMonth() + 1, 0).toISOString().slice(0, 10));
-            }}>Mês atual</Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => {
-              const n = new Date();
-              setFrom(new Date(n.getFullYear(), n.getMonth() - 1, 1).toISOString().slice(0, 10));
-              setTo(new Date(n.getFullYear(), n.getMonth(), 0).toISOString().slice(0, 10));
-            }}>Mês anterior</Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => {
-              const y = new Date().getFullYear();
-              setFrom(`${y}-01-01`); setTo(`${y}-12-31`);
-            }}>Ano</Button>
+          <div className="space-y-1">
+            <Label>De</Label>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
-          <Button onClick={exportCSV} variant="outline" className="ml-auto" disabled={!data || data.rows.length === 0}>
+          <div className="space-y-1">
+            <Label>Até</Label>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                const n = new Date();
+                setFrom(new Date(n.getFullYear(), n.getMonth(), 1).toISOString().slice(0, 10));
+                setTo(new Date(n.getFullYear(), n.getMonth() + 1, 0).toISOString().slice(0, 10));
+              }}
+            >
+              Mês atual
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                const n = new Date();
+                setFrom(new Date(n.getFullYear(), n.getMonth() - 1, 1).toISOString().slice(0, 10));
+                setTo(new Date(n.getFullYear(), n.getMonth(), 0).toISOString().slice(0, 10));
+              }}
+            >
+              Mês anterior
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                const y = new Date().getFullYear();
+                setFrom(`${y}-01-01`);
+                setTo(`${y}-12-31`);
+              }}
+            >
+              Ano
+            </Button>
+          </div>
+          <Button
+            onClick={exportCSV}
+            variant="outline"
+            className="ml-auto"
+            disabled={!data || data.rows.length === 0}
+          >
             <Download className="h-4 w-4" /> Exportar CSV
           </Button>
         </CardContent>
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card><CardHeader><CardTitle className="text-sm text-muted-foreground">Receita bruta</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold text-success">{formatBRL(data?.receitas ?? 0)}</div></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm text-muted-foreground">Despesas</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold text-destructive">{formatBRL(data?.despesas ?? 0)}</div></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm text-muted-foreground">Lucro líquido</CardTitle></CardHeader>
-          <CardContent><div className={"text-2xl font-bold " + (saldo >= 0 ? "text-success" : "text-destructive")}>{formatBRL(saldo)}</div></CardContent></Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Receita bruta</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-success">{formatBRL(data?.receitas ?? 0)}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Despesas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">
+              {formatBRL(data?.despesas ?? 0)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Lucro líquido</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className={"text-2xl font-bold " + (saldo >= 0 ? "text-success" : "text-destructive")}
+            >
+              {formatBRL(saldo)}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          {isLoading ? <p className="p-6 text-muted-foreground">Carregando...</p>
-          : !data || data.rows.length === 0 ? <p className="p-6 text-center text-muted-foreground">Sem lançamentos no período.</p>
-          : (
+          {isLoading ? (
+            <p className="p-6 text-muted-foreground">Carregando...</p>
+          ) : !data || data.rows.length === 0 ? (
+            <p className="p-6 text-center text-muted-foreground">Sem lançamentos no período.</p>
+          ) : (
             <Table>
-              <TableHeader><TableRow>
-                <TableHead>Tipo</TableHead><TableHead>Data</TableHead>
-                <TableHead>Descrição</TableHead><TableHead className="text-right">Valor</TableHead>
-              </TableRow></TableHeader>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                </TableRow>
+              </TableHeader>
               <TableBody>
                 {data.rows.map((r, i) => (
                   <TableRow key={i}>
-                    <TableCell><Badge variant={r.kind === "Receita" ? "default" : "destructive"} className={r.kind === "Receita" ? "bg-green-600 hover:bg-green-600 text-white" : ""}>{r.kind}</Badge></TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={r.kind === "Receita" ? "default" : "destructive"}
+                        className={
+                          r.kind === "Receita" ? "bg-green-600 hover:bg-green-600 text-white" : ""
+                        }
+                      >
+                        {r.kind}
+                      </Badge>
+                    </TableCell>
                     <TableCell>{formatDate(r.date)}</TableCell>
                     <TableCell>{r.description}</TableCell>
-                    <TableCell className={"text-right font-medium " + (r.kind === "Despesa" ? "text-destructive" : "text-success")}>
-                      {r.kind === "Despesa" ? "- " : ""}{formatBRL(r.amount)}
+                    <TableCell
+                      className={
+                        "text-right font-medium " +
+                        (r.kind === "Despesa" ? "text-destructive" : "text-success")
+                      }
+                    >
+                      {r.kind === "Despesa" ? "- " : ""}
+                      {formatBRL(r.amount)}
                     </TableCell>
                   </TableRow>
                 ))}

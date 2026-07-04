@@ -15,22 +15,32 @@ export const Route = createFileRoute("/_authenticated/admin/legais")({
 });
 
 type Slug = "termos" | "privacidade";
-const TITLES: Record<Slug, string> = { termos: "Termos de Uso", privacidade: "Política de Privacidade" };
+const TITLES: Record<Slug, string> = {
+  termos: "Termos de Uso",
+  privacidade: "Política de Privacidade",
+};
 
 function LegalPagesAdmin() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Páginas Legais</h1>
-        <p className="text-sm text-muted-foreground">Edite os textos públicos exibidos em <code>/termos</code> e <code>/privacidade</code>. Use HTML simples.</p>
+        <p className="text-sm text-muted-foreground">
+          Edite os textos públicos exibidos em <code>/termos</code> e <code>/privacidade</code>. Use
+          HTML simples.
+        </p>
       </div>
       <Tabs defaultValue="termos">
         <TabsList>
           <TabsTrigger value="termos">Termos de Uso</TabsTrigger>
           <TabsTrigger value="privacidade">Política de Privacidade</TabsTrigger>
         </TabsList>
-        <TabsContent value="termos"><LegalEditor slug="termos" /></TabsContent>
-        <TabsContent value="privacidade"><LegalEditor slug="privacidade" /></TabsContent>
+        <TabsContent value="termos">
+          <LegalEditor slug="termos" />
+        </TabsContent>
+        <TabsContent value="privacidade">
+          <LegalEditor slug="privacidade" />
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -47,7 +57,11 @@ function LegalEditor({ slug }: { slug: Slug }) {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase.from("legal_pages").select("content, updated_at").eq("slug", slug).maybeSingle();
+      const { data, error } = await supabase
+        .from("legal_pages")
+        .select("content, updated_at")
+        .eq("slug", slug)
+        .maybeSingle();
       if (error) toast.error(error.message);
       setContent(data?.content ?? "");
       setUpdatedAt(data?.updated_at ?? null);
@@ -57,7 +71,9 @@ function LegalEditor({ slug }: { slug: Slug }) {
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from("legal_pages").upsert({ slug, content, updated_at: new Date().toISOString() });
+    const { error } = await supabase
+      .from("legal_pages")
+      .upsert({ slug, content, updated_at: new Date().toISOString() });
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Página salva com sucesso");
@@ -79,7 +95,12 @@ function LegalEditor({ slug }: { slug: Slug }) {
     }
   };
 
-  if (loading) return <div className="py-10 text-center text-sm text-muted-foreground"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>;
+  if (loading)
+    return (
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+      </div>
+    );
 
   return (
     <div className="mt-4 space-y-4">
@@ -98,11 +119,18 @@ function LegalEditor({ slug }: { slug: Slug }) {
           />
           <div className="flex justify-end">
             <Button onClick={runAi} disabled={aiBusy || !instruction.trim()}>
-              {aiBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {aiBusy ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
               Aplicar com IA
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">A IA lê o conteúdo atual, aplica sua instrução e devolve o documento completo. Revise antes de salvar.</p>
+          <p className="text-xs text-muted-foreground">
+            A IA lê o conteúdo atual, aplica sua instrução e devolve o documento completo. Revise
+            antes de salvar.
+          </p>
         </CardContent>
       </Card>
 
@@ -118,8 +146,12 @@ function LegalEditor({ slug }: { slug: Slug }) {
         <CardContent>
           <Tabs defaultValue="edit">
             <TabsList>
-              <TabsTrigger value="edit"><Code className="mr-1 h-3.5 w-3.5" /> HTML</TabsTrigger>
-              <TabsTrigger value="preview"><Eye className="mr-1 h-3.5 w-3.5" /> Pré-visualização</TabsTrigger>
+              <TabsTrigger value="edit">
+                <Code className="mr-1 h-3.5 w-3.5" /> HTML
+              </TabsTrigger>
+              <TabsTrigger value="preview">
+                <Eye className="mr-1 h-3.5 w-3.5" /> Pré-visualização
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="edit" className="mt-3">
               <Textarea

@@ -7,18 +7,34 @@ export type ExtraCharge = { label: string; amount: number };
 export type ContractPDFData = {
   contract_type?: string; // residencial | comercial
   property?: {
-    nickname?: string | null; address?: string | null; city?: string | null; state?: string | null;
-    zip_code?: string | null; type?: string | null; bedrooms?: number | null; area_m2?: number | null;
+    nickname?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
+    type?: string | null;
+    bedrooms?: number | null;
+    area_m2?: number | null;
   };
   tenant?: {
-    full_name?: string | null; cpf?: string | null; rg?: string | null;
-    email?: string | null; phone?: string | null;
-    address_street?: string | null; address_number?: string | null;
-    address_neighborhood?: string | null; address_city?: string | null; address_state?: string | null;
+    full_name?: string | null;
+    cpf?: string | null;
+    rg?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address_street?: string | null;
+    address_number?: string | null;
+    address_neighborhood?: string | null;
+    address_city?: string | null;
+    address_state?: string | null;
   };
   guarantor?: {
-    name?: string | null; cpf?: string | null; rg?: string | null;
-    email?: string | null; phone?: string | null; address?: string | null;
+    name?: string | null;
+    cpf?: string | null;
+    rg?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
   } | null;
   start_date: string;
   end_date: string;
@@ -34,11 +50,21 @@ export type ContractPDFData = {
 };
 
 export type OwnerProfile = {
-  full_name?: string | null; cpf?: string | null; rg?: string | null;
-  phone?: string | null; email?: string | null;
-  address_street?: string | null; address_number?: string | null; address_neighborhood?: string | null;
-  address_city?: string | null; address_uf?: string | null; address_zip?: string | null;
-  bank_name?: string | null; bank_agency?: string | null; bank_account?: string | null; pix_key?: string | null;
+  full_name?: string | null;
+  cpf?: string | null;
+  rg?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address_street?: string | null;
+  address_number?: string | null;
+  address_neighborhood?: string | null;
+  address_city?: string | null;
+  address_uf?: string | null;
+  address_zip?: string | null;
+  bank_name?: string | null;
+  bank_agency?: string | null;
+  bank_account?: string | null;
+  pix_key?: string | null;
 };
 
 export type SignatureFooter = {
@@ -51,7 +77,10 @@ export type SignatureFooter = {
 
 const ADJ_LABEL: Record<string, string> = { nenhum: "Nenhum", igpm: "IGP-M", ipca: "IPCA" };
 const GUARANTEE_LABEL: Record<string, string> = {
-  sem_garantia: "Sem garantia", fiador: "Fiador", caucao: "Caução em dinheiro", seguro_fianca: "Seguro fiança",
+  sem_garantia: "Sem garantia",
+  fiador: "Fiador",
+  caucao: "Caução em dinheiro",
+  seguro_fianca: "Seguro fiança",
 };
 
 export function generateContractPDF(
@@ -64,37 +93,60 @@ export function generateContractPDF(
   const H = doc.internal.pageSize.getHeight();
   const M = 48;
   let y = M;
-  const dash = (v: string | number | null | undefined) => (v !== null && v !== undefined && String(v).trim() ? String(v) : "—");
+  const dash = (v: string | number | null | undefined) =>
+    v !== null && v !== undefined && String(v).trim() ? String(v) : "—";
 
-  const ensure = (need: number) => { if (y + need > H - M) { doc.addPage(); y = M; } };
+  const ensure = (need: number) => {
+    if (y + need > H - M) {
+      doc.addPage();
+      y = M;
+    }
+  };
 
   // Header
-  doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(26, 74, 107);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(26, 74, 107);
   doc.text("AlugaFlow", M, y);
-  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(120);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(120);
   doc.text(`Emitido em ${new Date().toLocaleDateString("pt-BR")}`, W - M, y, { align: "right" });
   y += 10;
-  doc.setDrawColor(26, 74, 107); doc.line(M, y, W - M, y);
+  doc.setDrawColor(26, 74, 107);
+  doc.line(M, y, W - M, y);
   y += 24;
 
   doc.setTextColor(20);
-  doc.setFont("helvetica", "bold"); doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
   const tipo = (c.contract_type || "residencial").toUpperCase();
   doc.text(`CONTRATO DE LOCAÇÃO ${tipo}`, W / 2, y, { align: "center" });
   y += 8;
-  doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(120);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(120);
   doc.text("Regido pela Lei nº 8.245/91 (Lei do Inquilinato)", W / 2, y + 8, { align: "center" });
   y += 28;
 
   const section = (title: string) => {
     ensure(28);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(26, 74, 107);
-    doc.text(title, M, y); y += 14;
-    doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(20);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(26, 74, 107);
+    doc.text(title, M, y);
+    y += 14;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(20);
   };
   const line = (text: string) => {
     const wrapped = doc.splitTextToSize(text, W - 2 * M);
-    for (const w of wrapped) { ensure(14); doc.text(w, M, y); y += 13; }
+    for (const w of wrapped) {
+      ensure(14);
+      doc.text(w, M, y);
+      y += 13;
+    }
   };
 
   // PARTES
@@ -102,7 +154,15 @@ export function generateContractPDF(
   line(`Nome: ${dash(owner.full_name)}`);
   line(`CPF: ${dash(owner.cpf)}   RG: ${dash(owner.rg)}`);
   line(`E-mail: ${dash(owner.email)}   Telefone: ${dash(owner.phone)}`);
-  const oAddr = [owner.address_street, owner.address_number, owner.address_neighborhood, owner.address_city, owner.address_uf].filter(Boolean).join(", ");
+  const oAddr = [
+    owner.address_street,
+    owner.address_number,
+    owner.address_neighborhood,
+    owner.address_city,
+    owner.address_uf,
+  ]
+    .filter(Boolean)
+    .join(", ");
   if (oAddr) line(`Endereço: ${oAddr}${owner.address_zip ? ` - CEP ${owner.address_zip}` : ""}`);
   y += 6;
 
@@ -111,7 +171,15 @@ export function generateContractPDF(
   line(`Nome: ${dash(t?.full_name)}`);
   line(`CPF: ${dash(t?.cpf)}   RG: ${dash(t?.rg)}`);
   line(`E-mail: ${dash(t?.email)}   Telefone: ${dash(t?.phone)}`);
-  const tAddr = [t?.address_street, t?.address_number, t?.address_neighborhood, t?.address_city, t?.address_state].filter(Boolean).join(", ");
+  const tAddr = [
+    t?.address_street,
+    t?.address_number,
+    t?.address_neighborhood,
+    t?.address_city,
+    t?.address_state,
+  ]
+    .filter(Boolean)
+    .join(", ");
   if (tAddr) line(`Endereço: ${tAddr}`);
   y += 6;
 
@@ -128,8 +196,12 @@ export function generateContractPDF(
   section("IMÓVEL LOCADO");
   const p = c.property;
   line(`Identificação: ${dash(p?.nickname)}`);
-  line(`Endereço: ${dash(p?.address)}${p?.city ? ` - ${p.city}/${p.state ?? ""}` : ""}${p?.zip_code ? ` - CEP ${p.zip_code}` : ""}`);
-  line(`Tipo: ${dash(p?.type)}${p?.bedrooms ? ` | ${p.bedrooms} dorm.` : ""}${p?.area_m2 ? ` | ${p.area_m2} m²` : ""}`);
+  line(
+    `Endereço: ${dash(p?.address)}${p?.city ? ` - ${p.city}/${p.state ?? ""}` : ""}${p?.zip_code ? ` - CEP ${p.zip_code}` : ""}`,
+  );
+  line(
+    `Tipo: ${dash(p?.type)}${p?.bedrooms ? ` | ${p.bedrooms} dorm.` : ""}${p?.area_m2 ? ` | ${p.area_m2} m²` : ""}`,
+  );
   y += 10;
 
   // CLÁUSULAS
@@ -169,9 +241,10 @@ export function generateContractPDF(
     },
     {
       title: "CLÁUSULA 4ª — DO REAJUSTE",
-      body: c.adjustment_index === "nenhum"
-        ? "Não haverá reajuste do valor do aluguel durante a vigência deste contrato."
-        : `O valor do aluguel será reajustado a cada ${c.adjustment_frequency_months} (${valorPorExtenso(c.adjustment_frequency_months).split(" ")[0]}) meses, com base na variação acumulada do índice ${ADJ_LABEL[c.adjustment_index] ?? c.adjustment_index}, ou outro índice oficial que vier a substituí-lo, observada a periodicidade mínima legal.`,
+      body:
+        c.adjustment_index === "nenhum"
+          ? "Não haverá reajuste do valor do aluguel durante a vigência deste contrato."
+          : `O valor do aluguel será reajustado a cada ${c.adjustment_frequency_months} (${valorPorExtenso(c.adjustment_frequency_months).split(" ")[0]}) meses, com base na variação acumulada do índice ${ADJ_LABEL[c.adjustment_index] ?? c.adjustment_index}, ou outro índice oficial que vier a substituí-lo, observada a periodicidade mínima legal.`,
     },
     {
       title: "CLÁUSULA 5ª — DAS TAXAS, TRIBUTOS E ENCARGOS",
@@ -217,7 +290,10 @@ export function generateContractPDF(
 
   if (owner.bank_name || owner.pix_key) {
     section("DADOS PARA PAGAMENTO");
-    if (owner.bank_name) line(`Banco: ${owner.bank_name}   Agência: ${dash(owner.bank_agency)}   Conta: ${dash(owner.bank_account)}`);
+    if (owner.bank_name)
+      line(
+        `Banco: ${owner.bank_name}   Agência: ${dash(owner.bank_agency)}   Conta: ${dash(owner.bank_account)}`,
+      );
     if (owner.pix_key) line(`Chave PIX: ${owner.pix_key}`);
     y += 8;
   }
@@ -225,8 +301,10 @@ export function generateContractPDF(
   // ASSINATURAS
   ensure(180);
   y = Math.max(y + 30, y);
-  const cityLine = [owner.address_city, owner.address_uf].filter(Boolean).join("/") || "________________";
-  doc.setFontSize(10); doc.setTextColor(20);
+  const cityLine =
+    [owner.address_city, owner.address_uf].filter(Boolean).join("/") || "________________";
+  doc.setFontSize(10);
+  doc.setTextColor(20);
   doc.text(`${cityLine}, ${new Date().toLocaleDateString("pt-BR")}.`, M, y);
   y += 36;
 
@@ -234,14 +312,16 @@ export function generateContractPDF(
     { role: "LOCADOR", name: owner.full_name ?? "—", cpf: owner.cpf ?? "—" },
     { role: "LOCATÁRIO", name: t?.full_name ?? "—", cpf: t?.cpf ?? "—" },
   ];
-  if (c.guarantor?.name) signers.push({ role: "FIADOR", name: c.guarantor.name, cpf: c.guarantor.cpf ?? "—" });
+  if (c.guarantor?.name)
+    signers.push({ role: "FIADOR", name: c.guarantor.name, cpf: c.guarantor.cpf ?? "—" });
 
   for (const s of signers) {
     ensure(70);
     doc.setDrawColor(20);
     doc.line(M, y, W - M, y);
     y += 14;
-    doc.setFontSize(10); doc.setTextColor(20);
+    doc.setFontSize(10);
+    doc.setTextColor(20);
     doc.text(s.role, M, y);
     doc.text(s.name, W / 2, y, { align: "center" });
     doc.text(`CPF: ${s.cpf}`, W - M, y, { align: "right" });
@@ -250,17 +330,30 @@ export function generateContractPDF(
 
   // Rodapé de assinaturas eletrônicas
   if (signatures && signatures.length > 0) {
-    doc.addPage(); y = M;
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(26, 74, 107);
-    doc.text("REGISTRO DE ASSINATURAS ELETRÔNICAS", M, y); y += 18;
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(80);
-    doc.text("Este documento foi assinado eletronicamente conforme MP 2.200-2/2001. Validade jurídica garantida pelas evidências abaixo:", M, y, { maxWidth: W - 2 * M });
+    doc.addPage();
+    y = M;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(26, 74, 107);
+    doc.text("REGISTRO DE ASSINATURAS ELETRÔNICAS", M, y);
+    y += 18;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(80);
+    doc.text(
+      "Este documento foi assinado eletronicamente conforme MP 2.200-2/2001. Validade jurídica garantida pelas evidências abaixo:",
+      M,
+      y,
+      { maxWidth: W - 2 * M },
+    );
     y += 30;
-    doc.setTextColor(20); doc.setFontSize(10);
+    doc.setTextColor(20);
+    doc.setFontSize(10);
     for (const s of signatures) {
       ensure(70);
       doc.setFont("helvetica", "bold");
-      doc.text(s.role.toUpperCase(), M, y); y += 13;
+      doc.text(s.role.toUpperCase(), M, y);
+      y += 13;
       doc.setFont("helvetica", "normal");
       line(`Nome: ${s.name}`);
       line(`CPF: ${s.cpf}`);

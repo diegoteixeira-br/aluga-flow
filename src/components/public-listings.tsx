@@ -7,7 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
 import { getPhotoUrls } from "@/lib/public-photos";
@@ -55,7 +61,9 @@ export function PublicListings({ variant = "page" }: PublicListingsProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("id, ad_title, nickname, ad_description, address, city, state, neighborhood, type, bedrooms, bathrooms, area_m2, rent_amount")
+        .select(
+          "id, ad_title, nickname, ad_description, address, city, state, neighborhood, type, bedrooms, bathrooms, area_m2, rent_amount",
+        )
         .eq("listed_public", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -93,8 +101,17 @@ export function PublicListings({ variant = "page" }: PublicListingsProps) {
   const filtered = useMemo(() => {
     return listings.filter((p) => {
       const citySearch = dCity.toLowerCase();
-      if (citySearch && !(p.city ?? "").toLowerCase().includes(citySearch) && !(p.neighborhood ?? "").toLowerCase().includes(citySearch)) return false;
-      if (dNeighborhood && !(p.neighborhood ?? "").toLowerCase().includes(dNeighborhood.toLowerCase())) return false;
+      if (
+        citySearch &&
+        !(p.city ?? "").toLowerCase().includes(citySearch) &&
+        !(p.neighborhood ?? "").toLowerCase().includes(citySearch)
+      )
+        return false;
+      if (
+        dNeighborhood &&
+        !(p.neighborhood ?? "").toLowerCase().includes(dNeighborhood.toLowerCase())
+      )
+        return false;
       if (type !== "todos" && p.type !== type) return false;
       if (bedrooms !== "todos") {
         const n = parseInt(bedrooms, 10);
@@ -117,40 +134,98 @@ export function PublicListings({ variant = "page" }: PublicListingsProps) {
 
   return (
     <>
-      <section className={isHome ? "relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-12 md:py-16" : "border-b bg-muted/30 py-8"}>
+      <section
+        className={
+          isHome
+            ? "relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-12 md:py-16"
+            : "border-b bg-muted/30 py-8"
+        }
+      >
         <div className={isHome ? "mx-auto max-w-5xl px-4 text-center" : "mx-auto max-w-6xl px-4"}>
-          <h1 className={isHome ? "text-3xl font-bold tracking-tight md:text-5xl" : "text-2xl font-bold tracking-tight md:text-3xl"}>
+          <h1
+            className={
+              isHome
+                ? "text-3xl font-bold tracking-tight md:text-5xl"
+                : "text-2xl font-bold tracking-tight md:text-3xl"
+            }
+          >
             {isHome ? "Encontre seu próximo lar" : "Imóveis para alugar"}
           </h1>
-          <p className={isHome ? "mx-auto mt-3 max-w-2xl text-muted-foreground" : "mt-1 text-sm text-muted-foreground"}>
+          <p
+            className={
+              isHome
+                ? "mx-auto mt-3 max-w-2xl text-muted-foreground"
+                : "mt-1 text-sm text-muted-foreground"
+            }
+          >
             Aluguel direto com o proprietário, sem intermediários.
           </p>
 
-          <div className={isHome ? "mx-auto mt-8 grid gap-3 rounded-2xl border bg-card p-4 text-left shadow-lg md:grid-cols-6" : "mt-6 grid gap-3 rounded-xl border bg-background p-4 shadow-sm md:grid-cols-4"}>
+          <div
+            className={
+              isHome
+                ? "mx-auto mt-8 grid gap-3 rounded-2xl border bg-card p-4 text-left shadow-lg md:grid-cols-6"
+                : "mt-6 grid gap-3 rounded-xl border bg-background p-4 shadow-sm md:grid-cols-4"
+            }
+          >
             <div className={isHome ? "space-y-1 md:col-span-2" : "space-y-1"}>
               <Label>{isHome ? "Cidade ou bairro" : "Cidade"}</Label>
-              <Input value={city} onChange={(e) => { setCity(e.target.value); setPage(1); }} placeholder={isHome ? "Ex: Cáceres, Centro..." : "Ex: Cáceres"} />
+              <Input
+                value={city}
+                onChange={(e) => {
+                  setCity(e.target.value);
+                  setPage(1);
+                }}
+                placeholder={isHome ? "Ex: Cáceres, Centro..." : "Ex: Cáceres"}
+              />
             </div>
             {!isHome && (
               <div className="space-y-1">
                 <Label>Bairro</Label>
-                <Input value={neighborhood} onChange={(e) => { setNeighborhood(e.target.value); setPage(1); }} placeholder="Ex: Centro" />
+                <Input
+                  value={neighborhood}
+                  onChange={(e) => {
+                    setNeighborhood(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Ex: Centro"
+                />
               </div>
             )}
             <div className="space-y-1">
               <Label>Tipo</Label>
-              <Select value={type} onValueChange={(v) => { setType(v); setPage(1); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={type}
+                onValueChange={(v) => {
+                  setType(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {TYPES.map((t) => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}
+                  {TYPES.map((t) => (
+                    <SelectItem key={t} value={t} className="capitalize">
+                      {t}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
               <Label>Quartos</Label>
-              <Select value={bedrooms} onValueChange={(v) => { setBedrooms(v); setPage(1); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={bedrooms}
+                onValueChange={(v) => {
+                  setBedrooms(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Qualquer</SelectItem>
                   <SelectItem value="1">1</SelectItem>
@@ -163,8 +238,16 @@ export function PublicListings({ variant = "page" }: PublicListingsProps) {
             {!isHome && (
               <div className="space-y-1">
                 <Label>Banheiros</Label>
-                <Select value={bathrooms} onValueChange={(v) => { setBathrooms(v); setPage(1); }}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={bathrooms}
+                  onValueChange={(v) => {
+                    setBathrooms(v);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Qualquer</SelectItem>
                     <SelectItem value="1">1</SelectItem>
@@ -177,14 +260,34 @@ export function PublicListings({ variant = "page" }: PublicListingsProps) {
             )}
             <div className="space-y-1">
               <Label>{isHome ? "Mín (R$)" : "Valor mínimo (R$)"}</Label>
-              <Input type="number" value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPage(1); }} placeholder="0" />
+              <Input
+                type="number"
+                value={minPrice}
+                onChange={(e) => {
+                  setMinPrice(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="0"
+              />
             </div>
             <div className="space-y-1">
               <Label>{isHome ? "Máx (R$)" : "Valor máximo (R$)"}</Label>
-              <Input type="number" value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }} placeholder="∞" />
+              <Input
+                type="number"
+                value={maxPrice}
+                onChange={(e) => {
+                  setMaxPrice(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="∞"
+              />
             </div>
             <div className={isHome ? "md:col-span-6" : "flex items-end"}>
-              <Button className="w-full gap-2" size={isHome ? "lg" : "default"} onClick={() => setPage(1)}>
+              <Button
+                className="w-full gap-2"
+                size={isHome ? "lg" : "default"}
+                onClick={() => setPage(1)}
+              >
                 <Search className="h-4 w-4" /> {isHome ? "Buscar imóveis" : "Buscar"}
               </Button>
             </div>
@@ -228,15 +331,33 @@ export function PublicListings({ variant = "page" }: PublicListingsProps) {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {pageItems.map((p) => <ListingCard key={p.id} item={p} />)}
+            {pageItems.map((p) => (
+              <ListingCard key={p.id} item={p} />
+            ))}
           </div>
         )}
 
         {totalPages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>Anterior</Button>
-            <span className="text-sm text-muted-foreground">Página {page} de {totalPages}</span>
-            <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)}>Próxima</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Anterior
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Página {page} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Próxima
+            </Button>
           </div>
         )}
       </section>
@@ -272,9 +393,17 @@ const ListingCard = memo(function ListingCard({ item: p }: { item: Listing }) {
             {[p.neighborhood, p.city, p.state].filter(Boolean).join(", ") || p.address}
           </p>
           <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Bed className="h-3.5 w-3.5" /> {p.bedrooms ?? 0}</span>
-            <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5" /> {p.bathrooms ?? 0}</span>
-            {p.area_m2 ? <span className="flex items-center gap-1"><Maximize className="h-3.5 w-3.5" /> {p.area_m2} m²</span> : null}
+            <span className="flex items-center gap-1">
+              <Bed className="h-3.5 w-3.5" /> {p.bedrooms ?? 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <Bath className="h-3.5 w-3.5" /> {p.bathrooms ?? 0}
+            </span>
+            {p.area_m2 ? (
+              <span className="flex items-center gap-1">
+                <Maximize className="h-3.5 w-3.5" /> {p.area_m2} m²
+              </span>
+            ) : null}
           </div>
         </CardContent>
       </Card>

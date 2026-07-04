@@ -12,10 +12,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { formatBRL, formatDate, todayISO } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/expenses")({
@@ -23,10 +52,23 @@ export const Route = createFileRoute("/_authenticated/expenses")({
   component: ExpensesPage,
 });
 
-const CATEGORIES = ["manutencao", "iptu", "condominio", "seguro", "reforma", "administracao", "outro"] as const;
+const CATEGORIES = [
+  "manutencao",
+  "iptu",
+  "condominio",
+  "seguro",
+  "reforma",
+  "administracao",
+  "outro",
+] as const;
 const CATEGORY_LABEL: Record<string, string> = {
-  manutencao: "Manutenção", iptu: "IPTU", condominio: "Condomínio",
-  seguro: "Seguro", reforma: "Reforma", administracao: "Administração", outro: "Outro",
+  manutencao: "Manutenção",
+  iptu: "IPTU",
+  condominio: "Condomínio",
+  seguro: "Seguro",
+  reforma: "Reforma",
+  administracao: "Administração",
+  outro: "Outro",
 };
 
 const schema = z.object({
@@ -64,7 +106,10 @@ function ExpensesPage() {
       const { error } = await supabase.from("expenses").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["expenses"] }); toast.success("Despesa excluída"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["expenses"] });
+      toast.success("Despesa excluída");
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -74,23 +119,38 @@ function ExpensesPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Despesas</h1>
           <p className="text-sm text-muted-foreground">
-            {data.length} lançamento(s) — Total: <span className="font-semibold text-destructive">{formatBRL(total)}</span>
+            {data.length} lançamento(s) — Total:{" "}
+            <span className="font-semibold text-destructive">{formatBRL(total)}</span>
           </p>
         </div>
-        <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" /> Nova despesa</Button>
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setOpen(true);
+          }}
+        >
+          <Plus className="h-4 w-4" /> Nova despesa
+        </Button>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          {isLoading ? <p className="p-6 text-muted-foreground">Carregando...</p>
-          : data.length === 0 ? <p className="p-6 text-center text-muted-foreground">Nenhuma despesa registrada.</p>
-          : (
+          {isLoading ? (
+            <p className="p-6 text-muted-foreground">Carregando...</p>
+          ) : data.length === 0 ? (
+            <p className="p-6 text-center text-muted-foreground">Nenhuma despesa registrada.</p>
+          ) : (
             <Table>
-              <TableHeader><TableRow>
-                <TableHead>Data</TableHead><TableHead>Descrição</TableHead>
-                <TableHead>Categoria</TableHead><TableHead>Imóvel</TableHead>
-                <TableHead>Valor</TableHead><TableHead className="w-[100px]">Ações</TableHead>
-              </TableRow></TableHeader>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead>Imóvel</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead className="w-[100px]">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
               <TableBody>
                 {data.map((e) => (
                   <TableRow key={e.id}>
@@ -101,14 +161,35 @@ function ExpensesPage() {
                     <TableCell className="text-destructive">{formatBRL(e.amount)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => { setEditing(e); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditing(e);
+                            setOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         <AlertDialog>
-                          <AlertDialogTrigger asChild><Button size="icon" variant="ghost"><Trash2 className="h-4 w-4 text-destructive" /></Button></AlertDialogTrigger>
+                          <AlertDialogTrigger asChild>
+                            <Button size="icon" variant="ghost">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
                           <AlertDialogContent>
-                            <AlertDialogHeader><AlertDialogTitle>Excluir despesa?</AlertDialogTitle>
-                              <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription></AlertDialogHeader>
-                            <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => del.mutate(e.id)}>Excluir</AlertDialogAction></AlertDialogFooter>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir despesa?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => del.mutate(e.id)}>
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
@@ -126,23 +207,41 @@ function ExpensesPage() {
   );
 }
 
-function ExpenseDialog({ open, onOpenChange, editing }: { open: boolean; onOpenChange: (b: boolean) => void; editing: Expense | null }) {
+function ExpenseDialog({
+  open,
+  onOpenChange,
+  editing,
+}: {
+  open: boolean;
+  onOpenChange: (b: boolean) => void;
+  editing: Expense | null;
+}) {
   const qc = useQueryClient();
   const { data: properties = [] } = useQuery({
     queryKey: ["properties", "select"],
-    queryFn: async () => (await supabase.from("properties").select("id, nickname").order("nickname")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("properties").select("id, nickname").order("nickname")).data ?? [],
   });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    values: editing ? {
-      property_id: editing.property_id ?? "", category: editing.category,
-      description: editing.description, amount: editing.amount,
-      expense_date: editing.expense_date, notes: editing.notes ?? "",
-    } : {
-      property_id: "", category: "outro", description: "",
-      amount: 0, expense_date: todayISO(), notes: "",
-    },
+    values: editing
+      ? {
+          property_id: editing.property_id ?? "",
+          category: editing.category,
+          description: editing.description,
+          amount: editing.amount,
+          expense_date: editing.expense_date,
+          notes: editing.notes ?? "",
+        }
+      : {
+          property_id: "",
+          category: "outro",
+          description: "",
+          amount: 0,
+          expense_date: todayISO(),
+          notes: "",
+        },
   });
 
   const save = useMutation({
@@ -174,36 +273,78 @@ function ExpenseDialog({ open, onOpenChange, editing }: { open: boolean; onOpenC
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogHeader><DialogTitle>{editing ? "Editar despesa" : "Nova despesa"}</DialogTitle></DialogHeader>
-        <form onSubmit={form.handleSubmit((v) => save.mutate(v))} className="grid gap-4 sm:grid-cols-2">
+        <DialogHeader>
+          <DialogTitle>{editing ? "Editar despesa" : "Nova despesa"}</DialogTitle>
+        </DialogHeader>
+        <form
+          onSubmit={form.handleSubmit((v) => save.mutate(v))}
+          className="grid gap-4 sm:grid-cols-2"
+        >
           <div className="space-y-1 sm:col-span-2">
             <Label>Descrição *</Label>
             <Input {...form.register("description")} placeholder="Ex: Troca de torneira" />
-            {form.formState.errors.description && <p className="text-xs text-destructive">{form.formState.errors.description.message}</p>}
+            {form.formState.errors.description && (
+              <p className="text-xs text-destructive">
+                {form.formState.errors.description.message}
+              </p>
+            )}
           </div>
           <div className="space-y-1">
             <Label>Categoria</Label>
-            <Select value={form.watch("category")} onValueChange={(v) => form.setValue("category", v as FormValues["category"])}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{CATEGORY_LABEL[c]}</SelectItem>)}</SelectContent>
+            <Select
+              value={form.watch("category")}
+              onValueChange={(v) => form.setValue("category", v as FormValues["category"])}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {CATEGORY_LABEL[c]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
             <Label>Imóvel (opcional)</Label>
-            <Select value={form.watch("property_id") || "none"} onValueChange={(v) => form.setValue("property_id", v === "none" ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+            <Select
+              value={form.watch("property_id") || "none"}
+              onValueChange={(v) => form.setValue("property_id", v === "none" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Nenhum" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Nenhum</SelectItem>
-                {properties.map((p) => <SelectItem key={p.id} value={p.id}>{p.nickname}</SelectItem>)}
+                {properties.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.nickname}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1"><Label>Valor (R$) *</Label><Input type="number" step="0.01" {...form.register("amount")} /></div>
-          <div className="space-y-1"><Label>Data *</Label><Input type="date" {...form.register("expense_date")} /></div>
-          <div className="space-y-1 sm:col-span-2"><Label>Observações</Label><Textarea rows={3} {...form.register("notes")} /></div>
+          <div className="space-y-1">
+            <Label>Valor (R$) *</Label>
+            <Input type="number" step="0.01" {...form.register("amount")} />
+          </div>
+          <div className="space-y-1">
+            <Label>Data *</Label>
+            <Input type="date" {...form.register("expense_date")} />
+          </div>
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Observações</Label>
+            <Textarea rows={3} {...form.register("notes")} />
+          </div>
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={save.isPending}>
+              {save.isPending ? "Salvando..." : "Salvar"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

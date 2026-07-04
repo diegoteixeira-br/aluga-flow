@@ -33,9 +33,16 @@ async function asaasFetch(env: string, key: string, path: string, init?: Request
   });
   const text = await res.text();
   let body: any = null;
-  try { body = text ? JSON.parse(text) : null; } catch { body = text; }
+  try {
+    body = text ? JSON.parse(text) : null;
+  } catch {
+    body = text;
+  }
   if (!res.ok) {
-    const msg = body?.errors?.map?.((e: any) => e.description).join("; ") || text || `ASAAS HTTP ${res.status}`;
+    const msg =
+      body?.errors?.map?.((e: any) => e.description).join("; ") ||
+      text ||
+      `ASAAS HTTP ${res.status}`;
     throw new Error(`ASAAS: ${msg}`);
   }
   return body;
@@ -55,7 +62,10 @@ async function ensureCustomer(sb: any, env: string, key: string, tenant: any) {
       notificationDisabled: false,
     }),
   });
-  await sb.from("tenants").update({ asaas_customer_id: String(created.id) }).eq("id", tenant.id);
+  await sb
+    .from("tenants")
+    .update({ asaas_customer_id: String(created.id) })
+    .eq("id", tenant.id);
   return String(created.id);
 }
 
@@ -86,7 +96,11 @@ Deno.serve(async (req) => {
   const userId = userData.user.id;
 
   let payload: any = {};
-  try { payload = await req.json(); } catch { return json({ error: "Bad JSON" }, 400); }
+  try {
+    payload = await req.json();
+  } catch {
+    return json({ error: "Bad JSON" }, 400);
+  }
 
   // Carrega API key do proprietário
   const { data: prof, error: pErr } = await sb
@@ -95,7 +109,8 @@ Deno.serve(async (req) => {
     .eq("id", userId)
     .maybeSingle();
   if (pErr) return json({ error: pErr.message }, 500);
-  if (!prof?.asaas_api_key) return json({ error: "Configure sua API Key do ASAAS em Configurações" }, 400);
+  if (!prof?.asaas_api_key)
+    return json({ error: "Configure sua API Key do ASAAS em Configurações" }, 400);
   const key = prof.asaas_api_key as string;
   const env = (prof.asaas_environment as string) || "sandbox";
 
@@ -106,18 +121,26 @@ Deno.serve(async (req) => {
 
       const { data: payment, error: e1 } = await sb
         .from("payments")
-        .select("id, amount, due_date, asaas_payment_id, asaas_invoice_url, contract_id, reference_month")
+        .select(
+          "id, amount, due_date, asaas_payment_id, asaas_invoice_url, contract_id, reference_month",
+        )
         .eq("id", paymentId)
         .maybeSingle();
       if (e1) throw e1;
       if (!payment) return json({ error: "Pagamento não encontrado" }, 404);
       if (payment.asaas_payment_id && payment.asaas_invoice_url) {
-        return json({ paymentId: payment.asaas_payment_id, invoiceUrl: payment.asaas_invoice_url, reused: true });
+        return json({
+          paymentId: payment.asaas_payment_id,
+          invoiceUrl: payment.asaas_invoice_url,
+          reused: true,
+        });
       }
 
       const { data: contract, error: e2 } = await sb
         .from("contracts")
-        .select("id, tenant_id, tenant:tenants(id, full_name, cpf, email, phone, asaas_customer_id)")
+        .select(
+          "id, tenant_id, tenant:tenants(id, full_name, cpf, email, phone, asaas_customer_id)",
+        )
         .eq("id", payment.contract_id)
         .maybeSingle();
       if (e2) throw e2;
@@ -125,7 +148,10 @@ Deno.serve(async (req) => {
 
       const customerId = await ensureCustomer(sb, env, key, contract.tenant);
       const refLabel = payment.reference_month
-        ? new Date(payment.reference_month + "T00:00:00").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+        ? new Date(payment.reference_month + "T00:00:00").toLocaleDateString("pt-BR", {
+            month: "long",
+            year: "numeric",
+          })
         : "";
 
       const created = await asaasFetch(env, key, "/payments", {
@@ -142,7 +168,10 @@ Deno.serve(async (req) => {
 
       const asaasPaymentId = String(created.id);
       const invoiceUrl = created.invoiceUrl || created.bankSlipUrl || "";
-      await sb.from("payments").update({ asaas_payment_id: asaasPaymentId, asaas_invoice_url: invoiceUrl }).eq("id", payment.id);
+      await sb
+        .from("payments")
+        .update({ asaas_payment_id: asaasPaymentId, asaas_invoice_url: invoiceUrl })
+        .eq("id", payment.id);
       return json({ paymentId: asaasPaymentId, invoiceUrl, reused: false });
     }
 
@@ -168,11 +197,16 @@ Deno.serve(async (req) => {
         .order("due_date", { ascending: true });
       if (pErr2) throw pErr2;
 
-      let ok = 0, fail = 0; const errors: string[] = [];
+      let ok = 0,
+        fail = 0;
+      const errors: string[] = [];
       for (const p of payments ?? []) {
         try {
           const refLabel = p.reference_month
-            ? new Date(p.reference_month + "T00:00:00").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+            ? new Date(p.reference_month + "T00:00:00").toLocaleDateString("pt-BR", {
+                month: "long",
+                year: "numeric",
+              })
             : "";
           const created = await asaasFetch(env, key, "/payments", {
             method: "POST",
@@ -185,13 +219,17 @@ Deno.serve(async (req) => {
               externalReference: p.id,
             }),
           });
-          await sb.from("payments").update({
-            asaas_payment_id: String(created.id),
-            asaas_invoice_url: created.invoiceUrl || created.bankSlipUrl || "",
-          }).eq("id", p.id);
+          await sb
+            .from("payments")
+            .update({
+              asaas_payment_id: String(created.id),
+              asaas_invoice_url: created.invoiceUrl || created.bankSlipUrl || "",
+            })
+            .eq("id", p.id);
           ok++;
         } catch (e) {
-          fail++; errors.push((e as Error).message);
+          fail++;
+          errors.push((e as Error).message);
         }
       }
       return json({ created: ok, failed: fail, errors: errors.slice(0, 3) });

@@ -3,7 +3,18 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, DollarSign, Tags, Mail, FileText, CreditCard, ArrowLeft, ShieldAlert, ScrollText } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  DollarSign,
+  Tags,
+  Mail,
+  FileText,
+  CreditCard,
+  ArrowLeft,
+  ShieldAlert,
+  ScrollText,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -21,7 +32,6 @@ const items: NavItem[] = [
   { to: "/admin/legais", label: "Páginas Legais", icon: ScrollText },
   { to: "/admin/pagamentos", label: "Pagamentos", icon: CreditCard },
 ];
-
 
 function AdminLayout() {
   const { user, loading } = useAuth();
@@ -52,7 +62,9 @@ function AdminLayout() {
       <div className="mx-auto mt-20 max-w-md rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center">
         <ShieldAlert className="mx-auto h-10 w-10 text-destructive" />
         <h1 className="mt-3 text-xl font-semibold">Acesso negado</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Esta área é exclusiva para administradores. Redirecionando…</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Esta área é exclusiva para administradores. Redirecionando…
+        </p>
       </div>
     );
   }
@@ -66,7 +78,9 @@ function AdminLayout() {
         </div>
         <nav className="space-y-1 p-2">
           {items.map((it) => {
-            const active = it.exact ? path === it.to : path === it.to || path.startsWith(it.to + "/");
+            const active = it.exact
+              ? path === it.to
+              : path === it.to || path.startsWith(it.to + "/");
             return (
               <Link
                 key={it.to}
@@ -81,7 +95,10 @@ function AdminLayout() {
               </Link>
             );
           })}
-          <Link to="/dashboard" className="mt-4 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+          <Link
+            to="/dashboard"
+            className="mt-4 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+          >
             <ArrowLeft className="h-4 w-4" /> Voltar ao site
           </Link>
         </nav>

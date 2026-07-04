@@ -17,7 +17,12 @@ function json(body: unknown, status = 200) {
   });
 }
 
-async function stripeFetch(path: string, body: Record<string, string> | null, secret: string, method = "POST") {
+async function stripeFetch(
+  path: string,
+  body: Record<string, string> | null,
+  secret: string,
+  method = "POST",
+) {
   const init: RequestInit = {
     method,
     headers: {
@@ -60,15 +65,26 @@ Deno.serve(async (req) => {
   const { data: userData, error: userErr } = await sb.auth.getUser();
   if (userErr || !userData.user) return json({ error: "Unauthorized" }, 401);
 
-  const { data: isAdmin } = await sb.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+  const { data: isAdmin } = await sb.rpc("has_role", {
+    _user_id: userData.user.id,
+    _role: "admin",
+  });
   if (!isAdmin) return json({ error: "Forbidden" }, 403);
 
   let payload: any = {};
-  try { payload = await req.json(); } catch { return json({ error: "Bad JSON" }, 400); }
+  try {
+    payload = await req.json();
+  } catch {
+    return json({ error: "Bad JSON" }, 400);
+  }
   const planId = String(payload.planId || "");
   if (!planId) return json({ error: "planId obrigatório" }, 400);
 
-  const { data: plan, error: planErr } = await admin.from("plans").select("*").eq("id", planId).maybeSingle();
+  const { data: plan, error: planErr } = await admin
+    .from("plans")
+    .select("*")
+    .eq("id", planId)
+    .maybeSingle();
   if (planErr || !plan) return json({ error: "Plano não encontrado" }, 404);
 
   // Plano gratuito: nada a sincronizar na Stripe
@@ -83,16 +99,24 @@ Deno.serve(async (req) => {
     let productId: string | null = plan.stripe_product_id ?? null;
     if (productId) {
       try {
-        await stripeFetch(`/products/${productId}`, { name: plan.name, active: "true" }, STRIPE_SECRET);
+        await stripeFetch(
+          `/products/${productId}`,
+          { name: plan.name, active: "true" },
+          STRIPE_SECRET,
+        );
       } catch {
         productId = null; // produto não existe mais
       }
     }
     if (!productId) {
-      const product = await stripeFetch("/products", {
-        name: plan.name,
-        "metadata[plan_id]": plan.id,
-      }, STRIPE_SECRET);
+      const product = await stripeFetch(
+        "/products",
+        {
+          name: plan.name,
+          "metadata[plan_id]": plan.id,
+        },
+        STRIPE_SECRET,
+      );
       productId = product.id;
     }
 
@@ -112,28 +136,41 @@ Deno.serve(async (req) => {
         ) {
           needNewPrice = false;
         }
-      } catch { /* preço sumiu, criar novo */ }
+      } catch {
+        /* preço sumiu, criar novo */
+      }
     }
 
     if (needNewPrice) {
       // Arquivar preço antigo (Stripe prices são imutáveis)
       if (priceId) {
-        try { await stripeFetch(`/prices/${priceId}`, { active: "false" }, STRIPE_SECRET); } catch { /* noop */ }
+        try {
+          await stripeFetch(`/prices/${priceId}`, { active: "false" }, STRIPE_SECRET);
+        } catch {
+          /* noop */
+        }
       }
-      const newPrice = await stripeFetch("/prices", {
-        product: productId!,
-        unit_amount: String(cents),
-        currency: "brl",
-        "recurring[interval]": "month",
-        "metadata[plan_id]": plan.id,
-      }, STRIPE_SECRET);
+      const newPrice = await stripeFetch(
+        "/prices",
+        {
+          product: productId!,
+          unit_amount: String(cents),
+          currency: "brl",
+          "recurring[interval]": "month",
+          "metadata[plan_id]": plan.id,
+        },
+        STRIPE_SECRET,
+      );
       priceId = newPrice.id;
     }
 
-    await admin.from("plans").update({
-      stripe_product_id: productId,
-      stripe_price_id: priceId,
-    }).eq("id", planId);
+    await admin
+      .from("plans")
+      .update({
+        stripe_product_id: productId,
+        stripe_price_id: priceId,
+      })
+      .eq("id", planId);
 
     return json({ ok: true, stripe_product_id: productId, stripe_price_id: priceId });
   } catch (e) {

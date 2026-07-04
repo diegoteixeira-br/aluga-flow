@@ -25,13 +25,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteAccount } from "@/lib/account.functions";
 
-const schema = z.object({
-  currentPassword: z.string().min(1, "Informe sua senha atual"),
-  newPassword: z.string().min(8, "Mínimo de 8 caracteres"),
-  confirm: z.string().min(8, "Mínimo de 8 caracteres"),
-})
-  .refine((v) => v.newPassword === v.confirm, { path: ["confirm"], message: "As senhas não conferem" })
-  .refine((v) => v.newPassword !== v.currentPassword, { path: ["newPassword"], message: "A nova senha deve ser diferente da atual" });
+const schema = z
+  .object({
+    currentPassword: z.string().min(1, "Informe sua senha atual"),
+    newPassword: z.string().min(8, "Mínimo de 8 caracteres"),
+    confirm: z.string().min(8, "Mínimo de 8 caracteres"),
+  })
+  .refine((v) => v.newPassword === v.confirm, {
+    path: ["confirm"],
+    message: "As senhas não conferem",
+  })
+  .refine((v) => v.newPassword !== v.currentPassword, {
+    path: ["newPassword"],
+    message: "A nova senha deve ser diferente da atual",
+  });
 
 type Values = z.infer<typeof schema>;
 
@@ -46,7 +53,8 @@ export function SecurityTab() {
     setSubmitting(true);
     try {
       const { data: userData, error: userErr } = await supabase.auth.getUser();
-      if (userErr || !userData.user?.email) throw new Error("Sessão inválida. Faça login novamente.");
+      if (userErr || !userData.user?.email)
+        throw new Error("Sessão inválida. Faça login novamente.");
       const email = userData.user.email;
 
       // Reautenticação: confirma a senha atual antes de alterar
@@ -60,7 +68,8 @@ export function SecurityTab() {
       await new Promise((resolve) => window.setTimeout(resolve, 250));
       const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
       if (sessionErr) throw sessionErr;
-      if (!sessionData.session) throw new Error("Não foi possível validar a sessão. Tente novamente.");
+      if (!sessionData.session)
+        throw new Error("Não foi possível validar a sessão. Tente novamente.");
 
       const { error } = await supabase.auth.updateUser({ password: v.newPassword });
       if (error) throw error;
@@ -87,26 +96,36 @@ export function SecurityTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><KeyRound className="h-4 w-4" />Alterar senha</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <KeyRound className="h-4 w-4" />
+            Alterar senha
+          </CardTitle>
           <CardDescription>
-            Para sua segurança, confirme sua senha atual antes de definir uma nova.
-            Se esqueceu, saia e use "Esqueci minha senha" na tela de login.
+            Para sua segurança, confirme sua senha atual antes de definir uma nova. Se esqueceu,
+            saia e use "Esqueci minha senha" na tela de login.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1 sm:col-span-2">
               <Label>Senha atual</Label>
-              <PasswordInput autoComplete="current-password" {...form.register("currentPassword")} />
+              <PasswordInput
+                autoComplete="current-password"
+                {...form.register("currentPassword")}
+              />
               {form.formState.errors.currentPassword ? (
-                <p className="text-xs text-destructive">{form.formState.errors.currentPassword.message}</p>
+                <p className="text-xs text-destructive">
+                  {form.formState.errors.currentPassword.message}
+                </p>
               ) : null}
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label>Nova senha</Label>
               <PasswordInput autoComplete="new-password" {...form.register("newPassword")} />
               {form.formState.errors.newPassword ? (
-                <p className="text-xs text-destructive">{form.formState.errors.newPassword.message}</p>
+                <p className="text-xs text-destructive">
+                  {form.formState.errors.newPassword.message}
+                </p>
               ) : null}
             </div>
             <div className="space-y-1 sm:col-span-2">
@@ -117,19 +136,23 @@ export function SecurityTab() {
               ) : null}
             </div>
             <div className="sm:col-span-2">
-              <Button type="submit" disabled={submitting}>{submitting ? "Salvando..." : "Alterar senha"}</Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Salvando..." : "Alterar senha"}
+              </Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
-
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" />Autenticação em duas etapas</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4" />
+            Autenticação em duas etapas
+          </CardTitle>
           <CardDescription>
-            Proteja sua conta com um código temporário gerado por apps como Google Authenticator ou Authy.
-            Em breve disponível neste painel.
+            Proteja sua conta com um código temporário gerado por apps como Google Authenticator ou
+            Authy. Em breve disponível neste painel.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -147,7 +170,10 @@ function CurrentEmailCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Mail className="h-4 w-4" />E-mail da conta</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Mail className="h-4 w-4" />
+          E-mail da conta
+        </CardTitle>
         <CardDescription>
           E-mail atual: <span className="font-medium">{email || "—"}</span>.
         </CardDescription>
@@ -189,25 +215,35 @@ function DeleteAccountCard() {
     <Card className="border-destructive/40">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-destructive">
-          <Trash2 className="h-4 w-4" />Excluir conta
+          <Trash2 className="h-4 w-4" />
+          Excluir conta
         </CardTitle>
         <CardDescription>
-          Esta ação é <strong>permanente</strong> e <strong>não pode ser desfeita</strong>. Serão apagados:
-          imóveis, fotos, inquilinos, documentos, contratos, pagamentos, despesas, vistorias, leads,
-          anúncios e o seu cadastro. Recomendamos exportar seus relatórios antes de prosseguir.
+          Esta ação é <strong>permanente</strong> e <strong>não pode ser desfeita</strong>. Serão
+          apagados: imóveis, fotos, inquilinos, documentos, contratos, pagamentos, despesas,
+          vistorias, leads, anúncios e o seu cadastro. Recomendamos exportar seus relatórios antes
+          de prosseguir.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <AlertDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirmText(""); }}>
+        <AlertDialog
+          open={open}
+          onOpenChange={(v) => {
+            setOpen(v);
+            if (!v) setConfirmText("");
+          }}
+        >
           <AlertDialogTrigger asChild>
             <Button variant="destructive">
-              <Trash2 className="mr-2 h-4 w-4" />Excluir minha conta
+              <Trash2 className="mr-2 h-4 w-4" />
+              Excluir minha conta
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-5 w-5" />Tem certeza absoluta?
+                <AlertTriangle className="h-5 w-5" />
+                Tem certeza absoluta?
               </AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-3 text-sm">
@@ -224,7 +260,9 @@ function DeleteAccountCard() {
                     <li>Leads recebidos pelos anúncios</li>
                     <li>Identidade visual, perfil e credenciais de acesso</li>
                   </ul>
-                  <p>Para confirmar, digite <strong>EXCLUIR</strong> abaixo:</p>
+                  <p>
+                    Para confirmar, digite <strong>EXCLUIR</strong> abaixo:
+                  </p>
                   <Input
                     value={confirmText}
                     onChange={(e) => setConfirmText(e.target.value)}
@@ -238,7 +276,10 @@ function DeleteAccountCard() {
               <AlertDialogCancel disabled={submitting}>Cancelar</AlertDialogCancel>
               <AlertDialogAction
                 disabled={confirmText !== "EXCLUIR" || submitting}
-                onClick={(e) => { e.preventDefault(); onConfirm(); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onConfirm();
+                }}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 {submitting ? "Excluindo..." : "Excluir definitivamente"}
@@ -250,5 +291,3 @@ function DeleteAccountCard() {
     </Card>
   );
 }
-
-

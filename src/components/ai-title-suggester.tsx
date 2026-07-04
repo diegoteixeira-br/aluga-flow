@@ -56,7 +56,12 @@ export function AiTitleSuggester({ onPick }: { onPick: (title: string, slug: str
                 placeholder="Ex.: Lei do Inquilinato, IGP-M..."
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); suggest(); } }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    suggest();
+                  }
+                }}
               />
               <Button type="button" size="sm" onClick={() => suggest()} disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Atualizar"}
@@ -75,10 +80,16 @@ export function AiTitleSuggester({ onPick }: { onPick: (title: string, slug: str
                   <button
                     type="button"
                     className="w-full rounded-md border p-2 text-left text-sm hover:bg-accent"
-                    onClick={() => { onPick(s.title, slugify(s.title)); setOpen(false); setItems([]); }}
+                    onClick={() => {
+                      onPick(s.title, slugify(s.title));
+                      setOpen(false);
+                      setItems([]);
+                    }}
                   >
                     <div className="font-medium leading-snug">{s.title}</div>
-                    {s.angle && <div className="mt-0.5 text-xs text-muted-foreground">{s.angle}</div>}
+                    {s.angle && (
+                      <div className="mt-0.5 text-xs text-muted-foreground">{s.angle}</div>
+                    )}
                   </button>
                 </li>
               ))}

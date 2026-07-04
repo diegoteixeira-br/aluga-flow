@@ -10,15 +10,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/password-input";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-type Member = { id: string; full_name: string | null; email: string | null; role: string; created_at: string };
+type Member = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  role: string;
+  created_at: string;
+};
 
 export function TeamTab() {
   const { data: plan } = useMyPlan();
@@ -44,9 +61,12 @@ export function TeamTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><UserCog className="h-5 w-5" /> Equipe</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <UserCog className="h-5 w-5" /> Equipe
+        </CardTitle>
         <CardDescription>
-          Gerencie sub-usuários (membros) da sua conta. Eles fazem login com e-mail e senha próprios e acessam os mesmos dados da conta principal.
+          Gerencie sub-usuários (membros) da sua conta. Eles fazem login com e-mail e senha próprios
+          e acessam os mesmos dados da conta principal.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -63,9 +83,7 @@ export function TeamTab() {
                   </Button>
                 </span>
               </TooltipTrigger>
-              {atLimit && (
-                <TooltipContent>Limite do plano atingido</TooltipContent>
-              )}
+              {atLimit && <TooltipContent>Limite do plano atingido</TooltipContent>}
             </Tooltip>
           </TooltipProvider>
         </div>
@@ -98,14 +116,34 @@ export function TeamTab() {
         )}
       </CardContent>
 
-      <CreateDialog open={openCreate} onOpenChange={setOpenCreate} onCreated={() => qc.invalidateQueries({ queryKey: ["team", "members"] })} />
-      <EditDialog member={editing} onClose={() => setEditing(null)} onSaved={() => qc.invalidateQueries({ queryKey: ["team", "members"] })} />
-      <DeleteDialog member={deleting} onClose={() => setDeleting(null)} onDeleted={() => qc.invalidateQueries({ queryKey: ["team", "members"] })} />
+      <CreateDialog
+        open={openCreate}
+        onOpenChange={setOpenCreate}
+        onCreated={() => qc.invalidateQueries({ queryKey: ["team", "members"] })}
+      />
+      <EditDialog
+        member={editing}
+        onClose={() => setEditing(null)}
+        onSaved={() => qc.invalidateQueries({ queryKey: ["team", "members"] })}
+      />
+      <DeleteDialog
+        member={deleting}
+        onClose={() => setDeleting(null)}
+        onDeleted={() => qc.invalidateQueries({ queryKey: ["team", "members"] })}
+      />
     </Card>
   );
 }
 
-function CreateDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpenChange: (b: boolean) => void; onCreated: () => void }) {
+function CreateDialog({
+  open,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (b: boolean) => void;
+  onCreated: () => void;
+}) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -121,7 +159,9 @@ function CreateDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpen
     },
     onSuccess: () => {
       toast.success("Membro adicionado");
-      setFullName(""); setEmail(""); setPassword("");
+      setFullName("");
+      setEmail("");
+      setPassword("");
       onOpenChange(false);
       onCreated();
     },
@@ -133,16 +173,36 @@ function CreateDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpen
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Adicionar membro</DialogTitle>
-          <DialogDescription>O membro receberá acesso aos mesmos dados da sua conta.</DialogDescription>
+          <DialogDescription>
+            O membro receberá acesso aos mesmos dados da sua conta.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="space-y-1"><Label>Nome completo *</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} /></div>
-          <div className="space-y-1"><Label>E-mail *</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-          <div className="space-y-1"><Label>Senha *</Label><PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" /></div>
+          <div className="space-y-1">
+            <Label>Nome completo *</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label>E-mail *</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label>Senha *</Label>
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+            />
+          </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={() => create.mutate()} disabled={create.isPending || !fullName || !email || password.length < 6}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => create.mutate()}
+            disabled={create.isPending || !fullName || !email || password.length < 6}
+          >
             {create.isPending ? "Criando..." : "Criar membro"}
           </Button>
         </DialogFooter>
@@ -151,7 +211,15 @@ function CreateDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpen
   );
 }
 
-function EditDialog({ member, onClose, onSaved }: { member: Member | null; onClose: () => void; onSaved: () => void }) {
+function EditDialog({
+  member,
+  onClose,
+  onSaved,
+}: {
+  member: Member | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
 
@@ -183,44 +251,94 @@ function EditDialog({ member, onClose, onSaved }: { member: Member | null; onClo
   });
 
   return (
-    <Dialog open={!!member} onOpenChange={(o) => { if (!o) { setFullName(""); setPassword(""); onClose(); } }}>
+    <Dialog
+      open={!!member}
+      onOpenChange={(o) => {
+        if (!o) {
+          setFullName("");
+          setPassword("");
+          onClose();
+        }
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar membro</DialogTitle>
           <DialogDescription>{member?.email}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="space-y-1"><Label>Nome completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} /></div>
-          <div className="space-y-1"><Label>Nova senha (opcional)</Label><PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Deixe em branco para manter" /></div>
+          <div className="space-y-1">
+            <Label>Nome completo</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label>Nova senha (opcional)</Label>
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Deixe em branco para manter"
+            />
+          </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => { setFullName(""); setPassword(""); onClose(); }}>Cancelar</Button>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setFullName("");
+              setPassword("");
+              onClose();
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending}>
+            {save.isPending ? "Salvando..." : "Salvar"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function DeleteDialog({ member, onClose, onDeleted }: { member: Member | null; onClose: () => void; onDeleted: () => void }) {
+function DeleteDialog({
+  member,
+  onClose,
+  onDeleted,
+}: {
+  member: Member | null;
+  onClose: () => void;
+  onDeleted: () => void;
+}) {
   const del = useMutation({
     mutationFn: async () => {
       if (!member) return;
-      const { data, error } = await supabase.functions.invoke("team", { body: { action: "delete", id: member.id } });
+      const { data, error } = await supabase.functions.invoke("team", {
+        body: { action: "delete", id: member.id },
+      });
       if (error) throw error;
       const r = data as { error?: string };
       if (r?.error) throw new Error(r.error);
     },
-    onSuccess: () => { toast.success("Membro removido"); onClose(); onDeleted(); },
+    onSuccess: () => {
+      toast.success("Membro removido");
+      onClose();
+      onDeleted();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   return (
-    <AlertDialog open={!!member} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <AlertDialog
+      open={!!member}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Remover membro?</AlertDialogTitle>
           <AlertDialogDescription>
-            O acesso de <strong>{member?.email}</strong> será revogado imediatamente. Esta ação não pode ser desfeita.
+            O acesso de <strong>{member?.email}</strong> será revogado imediatamente. Esta ação não
+            pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

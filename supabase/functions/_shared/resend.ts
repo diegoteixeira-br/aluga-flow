@@ -33,7 +33,6 @@ export async function sendEmail(args: SendArgs): Promise<{ id?: string; error?: 
     body.attachments = args.attachments;
   }
 
-
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -45,7 +44,11 @@ export async function sendEmail(args: SendArgs): Promise<{ id?: string; error?: 
     });
     const text = await res.text();
     let parsed: Record<string, unknown> = {};
-    try { parsed = text ? JSON.parse(text) : {}; } catch { /* noop */ }
+    try {
+      parsed = text ? JSON.parse(text) : {};
+    } catch {
+      /* noop */
+    }
     if (!res.ok) {
       console.error("[resend] fail", res.status, text);
       return { error: (parsed as { message?: string }).message || `HTTP ${res.status}` };

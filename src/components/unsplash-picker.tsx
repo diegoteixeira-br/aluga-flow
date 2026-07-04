@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,12 +26,55 @@ type Photo = {
 
 function keywordsFromTitle(t?: string | null) {
   if (!t) return "imóvel aluguel";
-  const stop = new Set(["de","da","do","das","dos","a","o","as","os","e","ou","em","no","na","para","por","com","um","uma","que","ao","à","às","seu","sua","seus","suas","2024","2025","2026"]);
-  const words = t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s]/g," ").split(/\s+/).filter(w=>w && w.length>2 && !stop.has(w));
+  const stop = new Set([
+    "de",
+    "da",
+    "do",
+    "das",
+    "dos",
+    "a",
+    "o",
+    "as",
+    "os",
+    "e",
+    "ou",
+    "em",
+    "no",
+    "na",
+    "para",
+    "por",
+    "com",
+    "um",
+    "uma",
+    "que",
+    "ao",
+    "à",
+    "às",
+    "seu",
+    "sua",
+    "seus",
+    "suas",
+    "2024",
+    "2025",
+    "2026",
+  ]);
+  const words = t
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w && w.length > 2 && !stop.has(w));
   return (words.slice(0, 4).join(" ") || "imóvel aluguel").trim();
 }
 
-export function UnsplashPicker({ title, onSelect }: { title?: string | null; onSelect: (url: string) => void }) {
+export function UnsplashPicker({
+  title,
+  onSelect,
+}: {
+  title?: string | null;
+  onSelect: (url: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,9 +112,11 @@ export function UnsplashPicker({ title, onSelect }: { title?: string | null; onS
     try {
       // Track download per Unsplash API guidelines (fire-and-forget)
       if (p.downloadLocation) {
-        supabase.functions.invoke("unsplash-search", {
-          body: { action: "track_download", downloadUrl: p.downloadLocation },
-        }).catch(() => {});
+        supabase.functions
+          .invoke("unsplash-search", {
+            body: { action: "track_download", downloadUrl: p.downloadLocation },
+          })
+          .catch(() => {});
       }
       onSelect(p.regular);
       toast.success(`Imagem de ${p.user?.name ?? "Unsplash"} selecionada`);
@@ -92,14 +144,29 @@ export function UnsplashPicker({ title, onSelect }: { title?: string | null; onS
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runSearch(query); } }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    runSearch(query);
+                  }
+                }}
                 placeholder="Ex.: contrato aluguel, imóvel, chaves casa..."
               />
               <Button type="button" onClick={() => runSearch(query)} disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Search className="mr-1 h-4 w-4" />Buscar</>}
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Search className="mr-1 h-4 w-4" />
+                    Buscar
+                  </>
+                )}
               </Button>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">Pré-preenchido com base no título do artigo. Edite e busque novamente se quiser outros resultados.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pré-preenchido com base no título do artigo. Edite e busque novamente se quiser outros
+              resultados.
+            </p>
           </div>
 
           {loading && (
@@ -119,7 +186,12 @@ export function UnsplashPicker({ title, onSelect }: { title?: string | null; onS
                   disabled={picking !== null}
                   title={p.description || "Selecionar"}
                 >
-                  <img src={p.thumb} alt={p.description} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+                  <img
+                    src={p.thumb}
+                    alt={p.description}
+                    className="aspect-[4/3] w-full object-cover"
+                    loading="lazy"
+                  />
                   <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
                     Foto: {p.user?.name}
                   </div>
@@ -140,11 +212,17 @@ export function UnsplashPicker({ title, onSelect }: { title?: string | null; onS
           )}
 
           <p className="text-xs text-muted-foreground">
-            Imagens fornecidas por <a href="https://unsplash.com" target="_blank" rel="noreferrer" className="underline">Unsplash</a>, uso gratuito conforme a licença Unsplash.
+            Imagens fornecidas por{" "}
+            <a href="https://unsplash.com" target="_blank" rel="noreferrer" className="underline">
+              Unsplash
+            </a>
+            , uso gratuito conforme a licença Unsplash.
           </p>
         </div>
         <DialogFooter className="border-t bg-background px-6 py-4">
-          <Button variant="outline" onClick={() => setOpen(false)}>Fechar</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Fechar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

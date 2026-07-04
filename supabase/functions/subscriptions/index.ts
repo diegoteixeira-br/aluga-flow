@@ -62,17 +62,28 @@ Deno.serve(async (req) => {
   const email = userData.user.email ?? "";
 
   let payload: any = {};
-  try { payload = await req.json(); } catch { return json({ error: "Bad JSON" }, 400); }
+  try {
+    payload = await req.json();
+  } catch {
+    return json({ error: "Bad JSON" }, 400);
+  }
   const action = String(payload.action || "");
 
   try {
     if (action === "get") {
-      const [{ data: profile }, { data: sub }, { data: properties }, { data: plans }] = await Promise.all([
-        sb.from("profiles").select("plan, full_name").eq("id", userId).maybeSingle(),
-        sb.from("subscriptions").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-        sb.from("properties").select("id, listed_public").eq("user_id", userId),
-        sb.from("plans").select("*").order("sort_order"),
-      ]);
+      const [{ data: profile }, { data: sub }, { data: properties }, { data: plans }] =
+        await Promise.all([
+          sb.from("profiles").select("plan, full_name").eq("id", userId).maybeSingle(),
+          sb
+            .from("subscriptions")
+            .select("*")
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          sb.from("properties").select("id, listed_public").eq("user_id", userId),
+          sb.from("plans").select("*").order("sort_order"),
+        ]);
       const plan = (profile?.plan ?? "free") as PlanId;
       const propCount = properties?.length ?? 0;
       const listedCount = (properties ?? []).filter((p: any) => p.listed_public).length;
@@ -94,9 +105,19 @@ Deno.serve(async (req) => {
       if (!secret) return json({ error: "Stripe não configurado (STRIPE_SECRET_KEY)" }, 500);
 
       const { data: plan } = await sb.from("plans").select("*").eq("id", planId).maybeSingle();
-      if (!plan?.stripe_price_id) return json({ error: `Plano ${planId} sem stripe_price_id. Configure no painel admin.` }, 400);
+      if (!plan?.stripe_price_id)
+        return json(
+          { error: `Plano ${planId} sem stripe_price_id. Configure no painel admin.` },
+          400,
+        );
 
-      const { data: existing } = await sb.from("subscriptions").select("stripe_customer_id").eq("user_id", userId).not("stripe_customer_id", "is", null).limit(1).maybeSingle();
+      const { data: existing } = await sb
+        .from("subscriptions")
+        .select("stripe_customer_id")
+        .eq("user_id", userId)
+        .not("stripe_customer_id", "is", null)
+        .limit(1)
+        .maybeSingle();
 
       const body: Record<string, string> = {
         mode: "subscription",
@@ -121,24 +142,41 @@ Deno.serve(async (req) => {
       const newPlan = String(payload.newPlan || "") as PlanId;
       if (!PLANS.includes(newPlan)) return json({ error: "newPlan inválido" }, 400);
 
-      const { data: profile } = await sb.from("profiles").select("plan").eq("id", userId).maybeSingle();
+      const { data: profile } = await sb
+        .from("profiles")
+        .select("plan")
+        .eq("id", userId)
+        .maybeSingle();
       const current = (profile?.plan ?? "free") as PlanId;
       if (RANK[newPlan] >= RANK[current]) return json({ error: "Downgrade inválido." }, 400);
 
-      const { data: sub } = await sb.from("subscriptions").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      const { data: sub } = await sb
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (sub?.stripe_subscription_id) {
         const secret = Deno.env.get("STRIPE_SECRET_KEY");
         if (!secret) return json({ error: "Stripe não configurado." }, 500);
-        await stripeFetch(`/subscriptions/${sub.stripe_subscription_id}`, { cancel_at_period_end: "true" }, secret);
+        await stripeFetch(
+          `/subscriptions/${sub.stripe_subscription_id}`,
+          { cancel_at_period_end: "true" },
+          secret,
+        );
       }
 
       if (sub) {
-        await admin.from("subscriptions").update({
-          cancel_at_period_end: true,
-          scheduled_plan: newPlan,
-          status: "scheduled_downgrade",
-        }).eq("id", sub.id);
+        await admin
+          .from("subscriptions")
+          .update({
+            cancel_at_period_end: true,
+            scheduled_plan: newPlan,
+            status: "scheduled_downgrade",
+          })
+          .eq("id", sub.id);
       } else {
         await admin.from("profiles").update({ plan: newPlan }).eq("id", userId);
       }
@@ -149,26 +187,44 @@ Deno.serve(async (req) => {
       const reason = String(payload.reason || "").slice(0, 500);
       if (!reason) return json({ error: "reason obrigatório" }, 400);
 
-      const { data: profile } = await sb.from("profiles").select("plan, full_name").eq("id", userId).maybeSingle();
+      const { data: profile } = await sb
+        .from("profiles")
+        .select("plan, full_name")
+        .eq("id", userId)
+        .maybeSingle();
       const plan = (profile?.plan ?? "free") as PlanId;
-      const { data: sub } = await sb.from("subscriptions").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      const { data: sub } = await sb
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       let effectiveDate = new Date().toISOString();
       if (sub?.stripe_subscription_id) {
         const secret = Deno.env.get("STRIPE_SECRET_KEY");
         if (!secret) return json({ error: "Stripe não configurado." }, 500);
-        const updated: any = await stripeFetch(`/subscriptions/${sub.stripe_subscription_id}`, { cancel_at_period_end: "true" }, secret);
-        if (updated?.current_period_end) effectiveDate = new Date(updated.current_period_end * 1000).toISOString();
+        const updated: any = await stripeFetch(
+          `/subscriptions/${sub.stripe_subscription_id}`,
+          { cancel_at_period_end: "true" },
+          secret,
+        );
+        if (updated?.current_period_end)
+          effectiveDate = new Date(updated.current_period_end * 1000).toISOString();
       } else if (sub?.current_period_end) {
         effectiveDate = sub.current_period_end;
       }
 
       if (sub) {
-        await admin.from("subscriptions").update({
-          cancel_at_period_end: true,
-          scheduled_plan: "free",
-          status: "scheduled_downgrade",
-        }).eq("id", sub.id);
+        await admin
+          .from("subscriptions")
+          .update({
+            cancel_at_period_end: true,
+            scheduled_plan: "free",
+            status: "scheduled_downgrade",
+          })
+          .eq("id", sub.id);
       } else {
         await admin.from("profiles").update({ plan: "free" }).eq("id", userId);
       }
