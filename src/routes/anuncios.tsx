@@ -2,7 +2,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { Menu, Mail, MessageCircle } from "lucide-react";
+import { Menu, Mail } from "lucide-react";
 
 export const Route = createFileRoute("/anuncios")({
   head: () => ({
