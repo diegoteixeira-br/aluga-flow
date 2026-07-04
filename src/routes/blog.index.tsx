@@ -5,6 +5,7 @@ import { PublicFooter, PublicHeader } from "./anuncios";
 import { formatDateBR, readingTime } from "@/lib/blog-utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AdSenseBlock } from "@/components/adsense-block";
 
 export const Route = createFileRoute("/blog/")({
   head: () => ({
