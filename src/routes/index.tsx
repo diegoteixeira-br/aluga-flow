@@ -42,6 +42,9 @@ function Landing() {
       <PublicHeader />
       <PublicListings variant="home" />
 
+      <div className="mx-auto max-w-6xl px-4"><AdSenseBlock /></div>
+
+
       <section className="border-t bg-gradient-to-br from-primary/10 via-background to-background py-12">
         <div className="mx-auto max-w-4xl px-4 text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">É proprietário ou imobiliária?</p>
