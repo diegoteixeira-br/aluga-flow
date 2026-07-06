@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { LeadInterestDialog } from "@/components/lead-interest-dialog";
+import { AdSenseBlock } from "@/components/adsense-block";
 import { Bed, Bath, Maximize, MapPin, Phone, ArrowLeft, MessageCircle } from "lucide-react";
 import { formatBRL } from "@/lib/format";
 import { getPhotoUrls } from "@/lib/public-photos";
@@ -181,6 +182,8 @@ function AnuncioDetail() {
           </div>
 
           <div className="space-y-4">
+            <AdSenseBlock className="my-0" />
+
             <Card>
               <CardContent className="p-5">
                 <p className="text-xs text-muted-foreground">Valor do aluguel</p>
