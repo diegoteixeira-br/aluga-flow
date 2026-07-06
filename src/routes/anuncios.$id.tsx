@@ -230,6 +230,8 @@ function AnuncioDetail() {
                 </Card>
               );
             })()}
+
+            <AdSenseBlock className="my-0" />
           </div>
         </div>
       </div>
