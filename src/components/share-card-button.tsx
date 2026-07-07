@@ -86,11 +86,14 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
     }
   }
 
+  const Icon = network === "facebook" ? Facebook : Instagram;
+  const label = network === "facebook" ? "Facebook" : "Instagram";
+
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={generate} disabled={busy} className={className}>
-        {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Share2 className="mr-2 h-4 w-4" />}
-        📱 Gerar Card (Insta/WhatsApp)
+      <Button type="button" variant="outline" size="sm" onClick={generate} disabled={busy} className={className} aria-label={`Compartilhar no ${label}`}>
+        {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icon className="mr-2 h-4 w-4" />}
+        {label}
       </Button>
 
       {/* Off-screen render target */}
