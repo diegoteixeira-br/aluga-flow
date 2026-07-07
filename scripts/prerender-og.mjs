@@ -87,6 +87,27 @@ function abs(u) {
 }
 
 /**
+ * Otimiza URL de imagem do Supabase Storage para OG (WhatsApp/Facebook):
+ * força 1200x630, resize cover e qualidade 70 via endpoint /render/image/.
+ */
+function ogImage(u) {
+  if (!u) return FALLBACK_IMG;
+  try {
+    const url = new URL(abs(u));
+    if (url.pathname.includes("/storage/v1/object/")) {
+      url.pathname = url.pathname.replace("/storage/v1/object/", "/storage/v1/render/image/");
+    }
+    url.searchParams.set("width", "1200");
+    url.searchParams.set("height", "630");
+    url.searchParams.set("resize", "cover");
+    url.searchParams.set("quality", "70");
+    return url.toString();
+  } catch {
+    return abs(u);
+  }
+}
+
+/**
  * Remove todas as tags que vamos reescrever e injeta as novas antes de </head>.
  */
 function renderHtml({ title, description, image, url, type = "website", extraJsonLd }) {
