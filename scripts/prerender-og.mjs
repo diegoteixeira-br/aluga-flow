@@ -17,13 +17,34 @@
  *   dist/anuncios/<id>.html       → servido em /anuncios/<id>
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
 const SITE = "https://alugaflow.com.br";
 const FALLBACK_IMG = `${SITE}/og-image.png`;
 const DIST = resolve(process.cwd(), "dist");
 const SHELL_PATH = join(DIST, "index.html");
+
+// Carrega .env manualmente (Node não faz isso sozinho, e este script roda
+// separado do Vite). Aceita .env, .env.local, .env.production.
+function loadEnvFile(path) {
+  if (!existsSync(path)) return;
+  const raw = readFileSync(path, "utf8");
+  for (const line of raw.split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+    if (!m) continue;
+    const key = m[1];
+    if (process.env[key]) continue;
+    let val = m[2].trim();
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      val = val.slice(1, -1);
+    }
+    process.env[key] = val;
+  }
+}
+for (const f of [".env", ".env.local", ".env.production"]) {
+  loadEnvFile(resolve(process.cwd(), f));
+}
 
 const SUPABASE_URL =
   process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
