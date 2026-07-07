@@ -102,6 +102,8 @@ function PostPage() {
           <Button variant="outline" size="sm" onClick={copy}><LinkIcon className="mr-2 h-4 w-4" /> Copiar link</Button>
         </div>
 
+        <BlogEngagement postId={post.id} />
+
         {related.length > 0 && (
           <section className="mt-12">
             <h2 className="text-xl font-bold">Artigos relacionados</h2>
