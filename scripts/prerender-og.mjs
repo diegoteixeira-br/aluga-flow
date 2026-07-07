@@ -137,7 +137,7 @@ async function writeOut(relPath, html) {
 let postsCount = 0;
 try {
   const posts = await sbGet(
-    "posts?select=slug,title,excerpt,content,cover_image_url,created_at,updated_at,author_name&published=eq.true&order=created_at.desc&limit=500",
+    "posts?select=slug,title,excerpt,content,cover_image_url,created_at,updated_at,published_at,author_name&published=eq.true&order=published_at.desc.nullslast&limit=500",
   );
   for (const p of posts) {
     if (!p.slug) continue;
