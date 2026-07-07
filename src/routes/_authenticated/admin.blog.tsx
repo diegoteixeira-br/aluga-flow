@@ -32,6 +32,7 @@ type Post = {
   published: boolean;
   scheduled_at: string | null;
   created_at: string;
+  published_at: string | null;
 };
 
 // Converte ISO (UTC) -> "YYYY-MM-DDTHH:mm" no fuso local para o <input type="datetime-local">
