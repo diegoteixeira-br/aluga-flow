@@ -109,7 +109,7 @@ function PostPage() {
         <Link to="/blog" className="text-sm text-muted-foreground hover:underline">← Voltar ao blog</Link>
         <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight md:text-4xl">{post.title}</h1>
         <div className="mt-2 text-sm text-muted-foreground">
-          Por {post.author_name} • {formatDateBR(post.created_at)} • {readingTime(post.content)} min de leitura
+          Por {post.author_name} • {formatDateBR(post.published_at ?? post.created_at)} • {readingTime(post.content)} min de leitura
         </div>
         {post.cover_image_url && (
           <img src={post.cover_image_url} alt={post.title} className="mt-6 aspect-[16/9] w-full rounded-lg object-cover" />
