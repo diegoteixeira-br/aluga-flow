@@ -17,33 +17,55 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ params, loaderData }) => {
     const post = loaderData?.post;
     if (!post) return { meta: [{ title: "Artigo não encontrado" }] };
+    const SITE = "https://alugaflow.com.br";
+    const url = `${SITE}/blog/${params.slug}`;
+    const description = (post.excerpt && String(post.excerpt).trim())
+      || String(post.content ?? "").replace(/[#*_`>\-]/g, "").replace(/\s+/g, " ").trim().slice(0, 150);
+    const image = post.cover_image_url
+      ? (String(post.cover_image_url).startsWith("http") ? post.cover_image_url : `${SITE}${post.cover_image_url}`)
+      : undefined;
     return {
       meta: [
         { title: `${post.title} — Blog AlugaFlow` },
-        { name: "description", content: post.excerpt },
+        { name: "description", content: description },
         { property: "og:title", content: post.title },
-        { property: "og:description", content: post.excerpt },
+        { property: "og:description", content: description },
         { property: "og:type", content: "article" },
-        { property: "og:url", content: `/blog/${params.slug}` },
-        ...(post.cover_image_url ? [{ property: "og:image", content: post.cover_image_url }] : []),
+        { property: "og:url", content: url },
+        { property: "og:site_name", content: "AlugaFlow" },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { property: "og:image:secure_url", content: image },
+              { property: "og:image:alt", content: post.title },
+              { property: "og:image:width", content: "1200" },
+              { property: "og:image:height", content: "630" },
+            ]
+          : []),
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        { name: "twitter:title", content: post.title },
+        { name: "twitter:description", content: description },
+        ...(image ? [{ name: "twitter:image", content: image }] : []),
       ],
-      links: [{ rel: "canonical", href: `/blog/${params.slug}` }],
+      links: [{ rel: "canonical", href: url }],
       scripts: [{
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Article",
           headline: post.title,
-          description: post.excerpt,
-          image: post.cover_image_url ? [post.cover_image_url] : undefined,
+          description,
+          image: image ? [image] : undefined,
           datePublished: post.created_at,
           dateModified: post.updated_at,
           author: { "@type": "Person", name: post.author_name },
           publisher: { "@type": "Organization", name: "AlugaFlow" },
+          mainEntityOfPage: url,
         }),
       }],
     };
   },
+
   notFoundComponent: () => (
     <div className="min-h-screen bg-background">
       <PublicHeader />
