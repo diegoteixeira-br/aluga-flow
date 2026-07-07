@@ -130,12 +130,12 @@ function PostPage() {
           <section className="mt-12">
             <h2 className="text-xl font-bold">Artigos relacionados</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              {related.map((r: { id: string; slug: string; title: string; cover_image_url: string | null; created_at: string }) => (
+              {related.map((r: { id: string; slug: string; title: string; cover_image_url: string | null; created_at: string; published_at: string | null }) => (
                 <Link key={r.id} to="/blog/$slug" params={{ slug: r.slug }} className="group overflow-hidden rounded-lg border bg-card">
                   {r.cover_image_url && <div className="aspect-[16/10] overflow-hidden bg-muted"><img src={r.cover_image_url} alt={r.title} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" /></div>}
                   <div className="p-3">
                     <h3 className="line-clamp-2 text-sm font-semibold">{r.title}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">{formatDateBR(r.created_at)}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{formatDateBR(r.published_at ?? r.created_at)}</p>
                   </div>
                 </Link>
               ))}
