@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { toJpeg } from "html-to-image";
-import { Share2, Loader2 } from "lucide-react";
+import { Loader2, Instagram, Facebook } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import logoSrc from "@/assets/alugaflow-symbol.png";
 import { formatBRL } from "@/lib/format";
+
+type Network = "instagram" | "facebook";
 
 type Props = {
   title: string;
@@ -13,6 +15,8 @@ type Props = {
   subtitle?: string | null;
   fileName?: string;
   className?: string;
+  /** Which network button to render. Defaults to "instagram". */
+  network?: Network;
 };
 
 /**
