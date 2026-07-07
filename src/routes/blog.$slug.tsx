@@ -56,7 +56,7 @@ export const Route = createFileRoute("/blog/$slug")({
           headline: post.title,
           description,
           image: image ? [image] : undefined,
-          datePublished: post.created_at,
+          datePublished: post.published_at ?? post.created_at,
           dateModified: post.updated_at,
           author: { "@type": "Person", name: post.author_name },
           publisher: { "@type": "Organization", name: "AlugaFlow" },
