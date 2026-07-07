@@ -286,6 +286,8 @@ function MyAdsPage() {
         </TabsContent>
       </Tabs>
 
+      <AdSenseBlock className="my-4" />
+
       <EditAdDialog editing={editing} onClose={() => setEditing(null)} />
     </div>
   );
