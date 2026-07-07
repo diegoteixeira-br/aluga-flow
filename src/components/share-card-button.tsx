@@ -23,7 +23,7 @@ type Props = {
  * Renders a hidden 1080x1920 (9:16) story card, converts to JPG via html-to-image
  * and either opens the native share sheet (mobile) or downloads the file (desktop).
  */
-export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "card-alugaflow.jpg", className }: Props) {
+export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "post-alugaflow.jpg", className, network = "instagram" }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
 
