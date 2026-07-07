@@ -56,7 +56,7 @@ export const Route = createFileRoute("/blog/$slug")({
           headline: post.title,
           description,
           image: image ? [image] : undefined,
-          datePublished: post.created_at,
+          datePublished: post.published_at ?? post.created_at,
           dateModified: post.updated_at,
           author: { "@type": "Person", name: post.author_name },
           publisher: { "@type": "Organization", name: "AlugaFlow" },
@@ -109,7 +109,7 @@ function PostPage() {
         <Link to="/blog" className="text-sm text-muted-foreground hover:underline">← Voltar ao blog</Link>
         <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight md:text-4xl">{post.title}</h1>
         <div className="mt-2 text-sm text-muted-foreground">
-          Por {post.author_name} • {formatDateBR(post.created_at)} • {readingTime(post.content)} min de leitura
+          Por {post.author_name} • {formatDateBR(post.published_at ?? post.created_at)} • {readingTime(post.content)} min de leitura
         </div>
         {post.cover_image_url && (
           <img src={post.cover_image_url} alt={post.title} className="mt-6 aspect-[16/9] w-full rounded-lg object-cover" />
@@ -130,12 +130,12 @@ function PostPage() {
           <section className="mt-12">
             <h2 className="text-xl font-bold">Artigos relacionados</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              {related.map((r: { id: string; slug: string; title: string; cover_image_url: string | null; created_at: string }) => (
+              {related.map((r: { id: string; slug: string; title: string; cover_image_url: string | null; created_at: string; published_at: string | null }) => (
                 <Link key={r.id} to="/blog/$slug" params={{ slug: r.slug }} className="group overflow-hidden rounded-lg border bg-card">
                   {r.cover_image_url && <div className="aspect-[16/10] overflow-hidden bg-muted"><img src={r.cover_image_url} alt={r.title} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" /></div>}
                   <div className="p-3">
                     <h3 className="line-clamp-2 text-sm font-semibold">{r.title}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">{formatDateBR(r.created_at)}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{formatDateBR(r.published_at ?? r.created_at)}</p>
                   </div>
                 </Link>
               ))}

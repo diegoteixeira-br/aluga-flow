@@ -3,13 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 type ListInput = { page?: number; pageSize?: number; limit?: number } | undefined;
 
+const LIST_COLS = "id,title,slug,excerpt,cover_image_url,author_name,created_at,published_at,scheduled_at";
+
 export async function listPublishedPosts(args?: { data?: ListInput } | ListInput) {
   const data: ListInput = (args as any)?.data ?? (args as ListInput) ?? {};
   if (data?.limit) {
     const { data: rows } = await supabase
       .from("posts")
-      .select("id,title,slug,excerpt,cover_image_url,author_name,created_at")
+      .select(LIST_COLS)
       .eq("published", true)
+      .order("published_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(data.limit);
     return { rows: rows ?? [], total: rows?.length ?? 0 };
@@ -20,8 +23,9 @@ export async function listPublishedPosts(args?: { data?: ListInput } | ListInput
   const to = from + pageSize - 1;
   const { data: rows, count } = await supabase
     .from("posts")
-    .select("id,title,slug,excerpt,cover_image_url,author_name,created_at", { count: "exact" })
+    .select(LIST_COLS, { count: "exact" })
     .eq("published", true)
+    .order("published_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .range(from, to);
   return { rows: rows ?? [], total: count ?? 0 };
@@ -38,9 +42,10 @@ export async function getPostBySlug(args: { data: { slug: string } } | { slug: s
   if (!post) return { post: null, related: [] };
   const { data: related } = await supabase
     .from("posts")
-    .select("id,title,slug,excerpt,cover_image_url,created_at")
+    .select("id,title,slug,excerpt,cover_image_url,created_at,published_at")
     .eq("published", true)
     .neq("id", post.id)
+    .order("published_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(3);
   return { post, related: related ?? [] };
