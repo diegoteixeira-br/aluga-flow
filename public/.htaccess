@@ -5,12 +5,21 @@
   RewriteEngine On
   RewriteBase /
 
-  # Não reescrever arquivos/diretórios reais (assets, /api, etc.)
+  # 1) Se existir um arquivo pré-renderizado <path>.html (gerado por
+  #    scripts/prerender-og.mjs para /blog/<slug> e /anuncios/<id>),
+  #    servi-lo direto. Assim crawlers de redes sociais recebem já no
+  #    primeiro request o HTML com as tags og:image/og:title corretas.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
+  RewriteRule ^(.+?)/?$ /$1.html [L]
+
+  # 2) Não reescrever arquivos/diretórios reais (assets, /api, etc.)
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Tudo o mais cai no SPA
+  # 3) Tudo o mais cai no SPA
   RewriteRule ^ index.html [L]
 </IfModule>
 
