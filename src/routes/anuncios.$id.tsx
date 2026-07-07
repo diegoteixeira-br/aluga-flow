@@ -78,7 +78,7 @@ export const Route = createFileRoute("/anuncios/$id")({
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: image },
     ];
-    return { meta, links: [{ rel: "canonical", href: path }] };
+    return { meta, links: [{ rel: "canonical", href: url }] };
   },
 
   component: AnuncioDetail,
