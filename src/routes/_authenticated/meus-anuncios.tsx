@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pencil, Mail, Phone, Eye, Check } from "lucide-react";
 import { formatBRL, formatDate } from "@/lib/format";
+import { AdSenseBlock } from "@/components/adsense-block";
 
 export const Route = createFileRoute("/_authenticated/meus-anuncios")({
   head: () => ({ meta: [{ title: "Meus Anúncios — AlugaFlow" }] }),
