@@ -327,12 +327,16 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
     if (!editing) return;
     setGeneratingDesc(true);
     try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess?.session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
       const { data, error } = await supabase.functions.invoke("generate-property-description", {
         body: {
           property_id: editing.id,
           title: adTitle.trim() || editing.nickname,
           description: adDescription,
         },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
