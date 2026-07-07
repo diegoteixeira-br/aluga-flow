@@ -16,7 +16,6 @@ export function toOgImageUrl(url: string | null | undefined): string | null {
     u.searchParams.set("height", "630");
     u.searchParams.set("resize", "cover");
     u.searchParams.set("quality", "70");
-    u.searchParams.set("format", "origin");
     return u.toString();
   } catch {
     return url;
