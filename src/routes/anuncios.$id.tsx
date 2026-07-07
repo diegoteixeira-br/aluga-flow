@@ -58,7 +58,8 @@ export const Route = createFileRoute("/anuncios/$id")({
     const rawDesc = prop.ad_description || prop.notes || `${prop.type ?? "Imóvel"} ${prop.bedrooms ? `com ${prop.bedrooms} quartos ` : ""}para alugar em ${[prop.neighborhood, prop.city, prop.state].filter(Boolean).join(", ")}.`;
     const description = `${priceStr} — ${rawDesc.replace(/\s+/g, " ").trim()}`.slice(0, 200);
     const rawImg = coverUrl ?? FALLBACK_IMG;
-    const image = rawImg.startsWith("http") ? rawImg : `${SITE}${rawImg}`;
+    const absImg = rawImg.startsWith("http") ? rawImg : `${SITE}${rawImg}`;
+    const image = toOgImageUrl(absImg) ?? absImg;
     const meta: Array<Record<string, string>> = [
       { title },
       { name: "description", content: description },
