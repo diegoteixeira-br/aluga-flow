@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Share2, Link as LinkIcon } from "lucide-react";
 import { AdSenseBlock } from "@/components/adsense-block";
 import { BlogEngagement } from "@/components/blog-engagement";
+import { toOgImageUrl } from "@/lib/og-image";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
@@ -21,9 +22,10 @@ export const Route = createFileRoute("/blog/$slug")({
     const url = `${SITE}/blog/${params.slug}`;
     const description = (post.excerpt && String(post.excerpt).trim())
       || String(post.content ?? "").replace(/[#*_`>\-]/g, "").replace(/\s+/g, " ").trim().slice(0, 150);
-    const image = post.cover_image_url
+    const rawImage = post.cover_image_url
       ? (String(post.cover_image_url).startsWith("http") ? post.cover_image_url : `${SITE}${post.cover_image_url}`)
       : undefined;
+    const image = toOgImageUrl(rawImage) ?? rawImage;
     return {
       meta: [
         { title: `${post.title} — Blog AlugaFlow` },

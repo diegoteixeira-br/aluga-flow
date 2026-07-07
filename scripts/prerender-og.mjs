@@ -87,6 +87,27 @@ function abs(u) {
 }
 
 /**
+ * Otimiza URL de imagem do Supabase Storage para OG (WhatsApp/Facebook):
+ * força 1200x630, resize cover e qualidade 70 via endpoint /render/image/.
+ */
+function ogImage(u) {
+  if (!u) return FALLBACK_IMG;
+  try {
+    const url = new URL(abs(u));
+    if (url.pathname.includes("/storage/v1/object/")) {
+      url.pathname = url.pathname.replace("/storage/v1/object/", "/storage/v1/render/image/");
+    }
+    url.searchParams.set("width", "1200");
+    url.searchParams.set("height", "630");
+    url.searchParams.set("resize", "cover");
+    url.searchParams.set("quality", "70");
+    return url.toString();
+  } catch {
+    return abs(u);
+  }
+}
+
+/**
  * Remove todas as tags que vamos reescrever e injeta as novas antes de </head>.
  */
 function renderHtml({ title, description, image, url, type = "website", extraJsonLd }) {
@@ -152,7 +173,7 @@ try {
     const html = renderHtml({
       title: `${p.title} — Blog AlugaFlow`,
       description: desc,
-      image: abs(p.cover_image_url),
+      image: ogImage(p.cover_image_url),
       url,
       type: "article",
       extraJsonLd: {
@@ -160,7 +181,7 @@ try {
         "@type": "Article",
         headline: p.title,
         description: desc,
-        image: p.cover_image_url ? [abs(p.cover_image_url)] : undefined,
+        image: p.cover_image_url ? [ogImage(p.cover_image_url)] : undefined,
         datePublished: p.published_at || p.created_at,
         dateModified: p.updated_at,
         author: { "@type": "Person", name: p.author_name },
@@ -191,7 +212,7 @@ try {
       const path = covers?.[0]?.storage_path;
       if (path) {
         // URL pública do storage (bucket property-photos)
-        coverUrl = `${SUPABASE_URL}/storage/v1/render/image/public/property-photos/${path}?width=1200&quality=80`;
+        coverUrl = `${SUPABASE_URL}/storage/v1/render/image/public/property-photos/${path}?width=1200&height=630&resize=cover&quality=70`;
       }
     } catch {}
     const url = `${SITE}/anuncios/${prop.id}`;
@@ -205,7 +226,7 @@ try {
     const html = renderHtml({
       title,
       description,
-      image: abs(coverUrl),
+      image: ogImage(coverUrl),
       url,
       type: "product",
     });
