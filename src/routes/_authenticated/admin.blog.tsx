@@ -155,7 +155,7 @@ function AdminBlog() {
                         ? <Badge variant="outline" title={formatScheduled(p.scheduled_at)}>Agendado · {formatScheduled(p.scheduled_at)}</Badge>
                         : <Badge variant="secondary">Rascunho</Badge>
                   }</td>
-                  <td className="p-3 text-muted-foreground">{formatDateBR(p.created_at)}</td>
+                  <td className="p-3 text-muted-foreground">{formatDateBR(p.published_at ?? p.scheduled_at ?? p.created_at)}</td>
                   <td className="p-3 whitespace-nowrap">
                     <div className="flex justify-end gap-1">
                       <Button size="sm" variant="ghost" onClick={() => setEditing(p)}><Pencil className="h-4 w-4" /></Button>
