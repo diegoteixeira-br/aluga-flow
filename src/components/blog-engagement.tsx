@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ThumbsUp, ThumbsDown, Loader2, MessageSquare } from "lucide-react";
 import { formatDateBR } from "@/lib/blog-utils";
+import { moderateComment } from "@/lib/moderation.functions";
 
 type Comment = {
   id: string;
