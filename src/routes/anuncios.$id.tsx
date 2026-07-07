@@ -11,6 +11,7 @@ import { AdSenseBlock } from "@/components/adsense-block";
 import { Bed, Bath, Maximize, MapPin, Phone, ArrowLeft, MessageCircle } from "lucide-react";
 import { formatBRL } from "@/lib/format";
 import { getPhotoUrls } from "@/lib/public-photos";
+import { toOgImageUrl } from "@/lib/og-image";
 import { PublicHeader, PublicFooter } from "./anuncios";
 
 export const Route = createFileRoute("/anuncios/$id")({
