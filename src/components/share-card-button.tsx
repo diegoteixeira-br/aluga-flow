@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { toJpeg } from "html-to-image";
-import { Share2, Loader2 } from "lucide-react";
+import { Loader2, Instagram, Facebook } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import logoSrc from "@/assets/alugaflow-symbol.png";
 import { formatBRL } from "@/lib/format";
+
+type Network = "instagram" | "facebook";
 
 type Props = {
   title: string;
@@ -13,13 +15,15 @@ type Props = {
   subtitle?: string | null;
   fileName?: string;
   className?: string;
+  /** Which network button to render. Defaults to "instagram". */
+  network?: Network;
 };
 
 /**
  * Renders a hidden 1080x1920 (9:16) story card, converts to JPG via html-to-image
  * and either opens the native share sheet (mobile) or downloads the file (desktop).
  */
-export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "card-alugaflow.jpg", className }: Props) {
+export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "post-alugaflow.jpg", className, network = "instagram" }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -82,11 +86,14 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
     }
   }
 
+  const Icon = network === "facebook" ? Facebook : Instagram;
+  const label = network === "facebook" ? "Facebook" : "Instagram";
+
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={generate} disabled={busy} className={className}>
-        {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Share2 className="mr-2 h-4 w-4" />}
-        📱 Gerar Card (Insta/WhatsApp)
+      <Button type="button" variant="outline" size="sm" onClick={generate} disabled={busy} className={className} aria-label={`Compartilhar no ${label}`}>
+        {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icon className="mr-2 h-4 w-4" />}
+        {label}
       </Button>
 
       {/* Off-screen render target */}
