@@ -20,12 +20,13 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "AlugaFlow | Sistema de Gestão de Aluguéis e Imóveis" },
       { property: "og:description", content: "Gestão de inquilinos, contratos automáticos, cobrança integrada e controle financeiro para proprietários e imobiliárias." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://alugaflow.com.br/" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AlugaFlow | Sistema de Gestão de Aluguéis e Imóveis" },
       { name: "twitter:description", content: "Gestão de inquilinos, contratos automáticos, cobrança integrada e controle financeiro." },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://alugaflow.com.br/" }],
+
   }),
   component: Landing,
 });
