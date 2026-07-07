@@ -37,39 +37,50 @@ export const Route = createFileRoute("/anuncios/$id")({
     return { prop, coverUrl };
   },
   head: ({ params, loaderData }) => {
+    const SITE = "https://alugaflow.com.br";
+    const FALLBACK_IMG = `${SITE}/og-image.png`;
     const path = `/anuncios/${params.id}`;
+    const url = `${SITE}${path}`;
     if (!loaderData) {
       return {
         meta: [
           { title: "Anúncio não encontrado — AlugaFlow" },
           { name: "robots", content: "noindex" },
+          { property: "og:url", content: url },
         ],
         links: [{ rel: "canonical", href: path }],
       };
     }
     const { prop, coverUrl } = loaderData;
     const title = `${prop.ad_title ?? prop.nickname} — Aluguel em ${prop.city}/${prop.state} | AlugaFlow`;
-    const rawDesc = prop.ad_description || prop.notes || `${prop.type ?? "Imóvel"} ${prop.bedrooms ? `com ${prop.bedrooms} quartos ` : ""}para alugar em ${[prop.neighborhood, prop.city, prop.state].filter(Boolean).join(", ")} por R$ ${Number(prop.rent_amount ?? 0).toLocaleString("pt-BR")}/mês.`;
-    const description = rawDesc.replace(/\s+/g, " ").trim().slice(0, 160);
+    const priceStr = `R$ ${Number(prop.rent_amount ?? 0).toLocaleString("pt-BR")}/mês`;
+    const rawDesc = prop.ad_description || prop.notes || `${prop.type ?? "Imóvel"} ${prop.bedrooms ? `com ${prop.bedrooms} quartos ` : ""}para alugar em ${[prop.neighborhood, prop.city, prop.state].filter(Boolean).join(", ")}.`;
+    const description = `${priceStr} — ${rawDesc.replace(/\s+/g, " ").trim()}`.slice(0, 200);
+    const rawImg = coverUrl ?? FALLBACK_IMG;
+    const image = rawImg.startsWith("http") ? rawImg : `${SITE}${rawImg}`;
     const meta: Array<Record<string, string>> = [
       { title },
       { name: "description", content: description },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "product" },
-      { property: "og:url", content: path },
+      { property: "og:url", content: url },
+      { property: "og:site_name", content: "AlugaFlow" },
+      { property: "og:image", content: image },
+      { property: "og:image:secure_url", content: image },
+      { property: "og:image:alt", content: prop.ad_title ?? prop.nickname ?? "Imóvel" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { property: "product:price:amount", content: String(prop.rent_amount ?? "") },
       { property: "product:price:currency", content: "BRL" },
-      { name: "twitter:card", content: coverUrl ? "summary_large_image" : "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },
+      { name: "twitter:image", content: image },
     ];
-    if (coverUrl) {
-      meta.push({ property: "og:image", content: coverUrl });
-      meta.push({ name: "twitter:image", content: coverUrl });
-    }
     return { meta, links: [{ rel: "canonical", href: path }] };
   },
+
   component: AnuncioDetail,
   errorComponent: ({ error }) => (
     <div className="min-h-screen bg-background">
