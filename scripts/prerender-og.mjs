@@ -212,7 +212,7 @@ try {
       const path = covers?.[0]?.storage_path;
       if (path) {
         // URL pública do storage (bucket property-photos)
-        coverUrl = `${SUPABASE_URL}/storage/v1/render/image/public/property-photos/${path}?width=1200&quality=80`;
+        coverUrl = `${SUPABASE_URL}/storage/v1/render/image/public/property-photos/${path}?width=1200&height=630&resize=cover&quality=70`;
       }
     } catch {}
     const url = `${SITE}/anuncios/${prop.id}`;
