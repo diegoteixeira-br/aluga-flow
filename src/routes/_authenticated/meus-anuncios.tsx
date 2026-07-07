@@ -176,7 +176,10 @@ function MyAdsPage() {
         </p>
       </div>
 
+      <AdSenseBlock className="my-2" />
+
       <Tabs defaultValue="anuncios">
+
         <TabsList>
           <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
           <TabsTrigger value="leads">Leads recebidos {unread > 0 && <Badge variant="destructive" className="ml-2">{unread}</Badge>}</TabsTrigger>
