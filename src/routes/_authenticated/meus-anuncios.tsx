@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Pencil, Mail, Phone, Eye, Check } from "lucide-react";
+import { Pencil, Mail, Phone, Eye, Check, Sparkles, Loader2 } from "lucide-react";
 import { formatBRL, formatDate } from "@/lib/format";
 import { AdSenseBlock } from "@/components/adsense-block";
 
@@ -299,6 +299,7 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
   const [adDescription, setAdDescription] = useState(editing?.ad_description ?? "");
   const [contactPhone, setContactPhone] = useState(editing?.contact_phone ?? "");
   const [showContact, setShowContact] = useState(editing?.show_contact_public ?? true);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   const editingId = editing?.id ?? null;
   useEffect(() => {
@@ -308,6 +309,43 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
     setShowContact(editing?.show_contact_public ?? true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingId]);
+
+  const { data: photoCount = 0 } = useQuery({
+    queryKey: ["property-photo-count", editingId],
+    enabled: !!editingId,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("property_photos")
+        .select("id", { count: "exact", head: true })
+        .eq("property_id", editingId!);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  async function generateDescription() {
+    if (!editing) return;
+    setGeneratingDesc(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-property-description", {
+        body: {
+          property_id: editing.id,
+          title: adTitle.trim() || editing.nickname,
+          description: adDescription,
+        },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const text = (data as any)?.description as string | undefined;
+      if (!text) throw new Error("Resposta vazia da IA");
+      setAdDescription(text);
+      toast.success("Descrição gerada! Revise antes de salvar.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao gerar descrição");
+    } finally {
+      setGeneratingDesc(false);
+    }
+  }
 
   const save = useMutation({
     mutationFn: async () => {
@@ -342,13 +380,31 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
               />
             </div>
             <div className="space-y-1">
-              <Label>Descrição para o anúncio</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label>Descrição para o anúncio</Label>
+                {photoCount > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateDescription}
+                    disabled={generatingDesc}
+                  >
+                    {generatingDesc ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Carregando...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4" /> Gerar descrição com IA</>
+                    )}
+                  </Button>
+                )}
+              </div>
               <Textarea
                 rows={5}
                 value={adDescription}
                 onChange={(e) => setAdDescription(e.target.value)}
                 placeholder="Descreva o imóvel, diferenciais, localização..."
                 maxLength={2000}
+                disabled={generatingDesc}
               />
             </div>
             <div className="space-y-1">
@@ -369,7 +425,7 @@ function EditAdDialog({ editing, onClose }: { editing: Prop | null; onClose: () 
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending || generatingDesc}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
