@@ -12,6 +12,7 @@ import { Bed, Bath, Maximize, MapPin, Phone, ArrowLeft, MessageCircle } from "lu
 import { formatBRL } from "@/lib/format";
 import { getPhotoUrls } from "@/lib/public-photos";
 import { toOgImageUrl } from "@/lib/og-image";
+import { ShareCardButton } from "@/components/share-card-button";
 import { PublicHeader, PublicFooter } from "./anuncios";
 
 export const Route = createFileRoute("/anuncios/$id")({
