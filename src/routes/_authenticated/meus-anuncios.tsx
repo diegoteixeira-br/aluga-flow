@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pencil, Mail, Phone, Eye, Check } from "lucide-react";
 import { formatBRL, formatDate } from "@/lib/format";
+import { AdSenseBlock } from "@/components/adsense-block";
 
 export const Route = createFileRoute("/_authenticated/meus-anuncios")({
   head: () => ({ meta: [{ title: "Meus Anúncios — AlugaFlow" }] }),
@@ -175,7 +176,10 @@ function MyAdsPage() {
         </p>
       </div>
 
+      <AdSenseBlock className="my-2" />
+
       <Tabs defaultValue="anuncios">
+
         <TabsList>
           <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
           <TabsTrigger value="leads">Leads recebidos {unread > 0 && <Badge variant="destructive" className="ml-2">{unread}</Badge>}</TabsTrigger>
@@ -281,6 +285,8 @@ function MyAdsPage() {
           })}
         </TabsContent>
       </Tabs>
+
+      <AdSenseBlock className="my-4" />
 
       <EditAdDialog editing={editing} onClose={() => setEditing(null)} />
     </div>
