@@ -87,6 +87,14 @@ function AdminBlog() {
     const isFutureSchedule = !!scheduledIso && new Date(scheduledIso).getTime() > Date.now();
     // Se houver agendamento no futuro, força published=false (cron vai publicar na hora)
     const published = isFutureSchedule ? false : !!editing.published;
+    // published_at: se agendado -> guarda a data agendada (será usada quando o cron publicar);
+    // se publicando agora -> mantém a existente ou marca now();
+    // se rascunho sem agendamento -> limpa.
+    const publishedAt = isFutureSchedule
+      ? scheduledIso
+      : published
+        ? (editing.published_at ?? new Date().toISOString())
+        : null;
     const payload = {
       title: editing.title,
       slug: editing.slug || slugify(editing.title),
@@ -96,6 +104,7 @@ function AdminBlog() {
       author_name: editing.author_name || "Equipe AlugaFlow",
       published,
       scheduled_at: isFutureSchedule ? scheduledIso : null,
+      published_at: publishedAt,
     };
     let error;
     if (editing.id) {
