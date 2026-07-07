@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Pencil, Mail, Phone, Eye, Check } from "lucide-react";
+import { Pencil, Mail, Phone, Eye, Check, Sparkles, Loader2 } from "lucide-react";
 import { formatBRL, formatDate } from "@/lib/format";
 import { AdSenseBlock } from "@/components/adsense-block";
 
