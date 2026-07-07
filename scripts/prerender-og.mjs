@@ -173,7 +173,7 @@ try {
     const html = renderHtml({
       title: `${p.title} — Blog AlugaFlow`,
       description: desc,
-      image: abs(p.cover_image_url),
+      image: ogImage(p.cover_image_url),
       url,
       type: "article",
       extraJsonLd: {
