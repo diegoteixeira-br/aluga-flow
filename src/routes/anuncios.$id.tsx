@@ -48,7 +48,7 @@ export const Route = createFileRoute("/anuncios/$id")({
           { name: "robots", content: "noindex" },
           { property: "og:url", content: url },
         ],
-        links: [{ rel: "canonical", href: path }],
+        links: [{ rel: "canonical", href: url }],
       };
     }
     const { prop, coverUrl } = loaderData;
