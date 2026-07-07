@@ -119,6 +119,18 @@ export function BlogEngagement({ postId }: { postId: string }) {
     if (tx.length < 2) return toast.error("Escreva um comentário.");
     if (tx.length > 2000) return toast.error("Comentário muito longo (máx. 2000).");
     setSending(true);
+    try {
+      const { approved } = await moderateComment({ data: { text: tx } });
+      if (!approved) {
+        setSending(false);
+        toast.error("Seu comentário contém termos não permitidos por nossas diretrizes de comunidade e não pôde ser publicado.");
+        return;
+      }
+    } catch {
+      setSending(false);
+      toast.error("Não foi possível validar seu comentário agora. Tente novamente em instantes.");
+      return;
+    }
     const { data: userData } = await supabase.auth.getUser();
     const { error } = await supabase.from("post_comments").insert({
       post_id: postId,
