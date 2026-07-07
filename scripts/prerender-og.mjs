@@ -161,7 +161,7 @@ try {
         headline: p.title,
         description: desc,
         image: p.cover_image_url ? [abs(p.cover_image_url)] : undefined,
-        datePublished: p.created_at,
+        datePublished: p.published_at || p.created_at,
         dateModified: p.updated_at,
         author: { "@type": "Person", name: p.author_name },
         publisher: { "@type": "Organization", name: "AlugaFlow" },
