@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Share2, Link as LinkIcon } from "lucide-react";
 import { AdSenseBlock } from "@/components/adsense-block";
+import { BlogEngagement } from "@/components/blog-engagement";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
