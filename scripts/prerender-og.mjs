@@ -226,7 +226,7 @@ try {
     const html = renderHtml({
       title,
       description,
-      image: abs(coverUrl),
+      image: ogImage(coverUrl),
       url,
       type: "product",
     });
