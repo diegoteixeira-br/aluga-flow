@@ -125,6 +125,12 @@ function PostPage() {
         <div className="mt-8 flex flex-wrap gap-2 border-t pt-6">
           <Button variant="outline" size="sm" onClick={share}><Share2 className="mr-2 h-4 w-4" /> WhatsApp</Button>
           <Button variant="outline" size="sm" onClick={copy}><LinkIcon className="mr-2 h-4 w-4" /> Copiar link</Button>
+          <ShareCardButton
+            title={post.title}
+            imageUrl={post.cover_image_url}
+            subtitle={post.excerpt ?? undefined}
+            fileName={`alugaflow-${post.slug}.jpg`}
+          />
         </div>
 
         <BlogEngagement postId={post.id} />
