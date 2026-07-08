@@ -183,7 +183,9 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {photos.map((p) => (
+          {photos.map((p, idx) => {
+            const isCover = idx === 0;
+            return (
             <div key={p.id} className="space-y-1">
               <div className="relative aspect-square overflow-hidden rounded-md border bg-muted">
                 {urls[p.storage_path] ? (
@@ -191,6 +193,22 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
                 ) : (
                   <div className="grid h-full place-items-center text-xs text-muted-foreground">...</div>
                 )}
+                {isCover && (
+                  <span className="absolute left-1 top-1 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                    Capa
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant={isCover ? "default" : "secondary"}
+                  className="absolute left-1 bottom-1 h-7 w-7"
+                  title={isCover ? "Foto de capa atual" : "Definir como capa"}
+                  disabled={isCover || setCover.isPending}
+                  onClick={() => setCover.mutate(p.id)}
+                >
+                  <Star className={`h-3.5 w-3.5 ${isCover ? "fill-current" : ""}`} />
+                </Button>
                 <Button
                   type="button"
                   size="icon"
@@ -210,7 +228,8 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
                 </SelectContent>
               </Select>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
