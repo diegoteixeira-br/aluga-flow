@@ -5,21 +5,31 @@
   RewriteEngine On
   RewriteBase /
 
+  # Evita que o Apache adicione barra final em diretórios reais
+  # (ex.: /blog vira /blog/ automaticamente e cai no 403 por não haver index).
+  DirectorySlash Off
+  Options -Indexes
+
   # 1) Se existir um arquivo pré-renderizado <path>.html (gerado por
   #    scripts/prerender-og.mjs para /blog/<slug> e /anuncios/<id>),
   #    servi-lo direto. Assim crawlers de redes sociais recebem já no
   #    primeiro request o HTML com as tags og:image/og:title corretas.
   RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
   RewriteRule ^(.+?)/?$ /$1.html [L]
 
-  # 2) Não reescrever arquivos/diretórios reais (assets, /api, etc.)
+  # 2) Requisições a diretórios reais que NÃO possuem index.html
+  #    (ex.: /blog/ com pasta pré-renderizada dentro) caem no SPA.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_FILENAME}/index.html !-f
+  RewriteRule ^ /index.html [L]
+
+  # 3) Não reescrever arquivos/diretórios reais restantes (assets, /api, etc.)
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 3) Tudo o mais cai no SPA
+  # 4) Tudo o mais cai no SPA
   RewriteRule ^ index.html [L]
 </IfModule>
 
