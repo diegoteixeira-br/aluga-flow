@@ -196,8 +196,6 @@ function AdminBlog() {
                     title={editing.title ?? ""}
                     onGenerated={(a) => setEditing((prev) => ({
                       ...(prev ?? {}),
-                      title: a.title,
-                      slug: prev?.id ? (prev.slug ?? a.slug) : a.slug,
                       excerpt: a.excerpt || prev?.excerpt,
                       content: a.content,
                     }))}
