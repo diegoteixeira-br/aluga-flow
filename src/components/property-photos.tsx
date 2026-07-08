@@ -138,8 +138,9 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
         <div>
           <p className="font-medium text-sm">Fotos do imóvel</p>
           <p className="text-xs text-muted-foreground">
-            {photos.length}/{MAX_PHOTOS_PER_PROPERTY} — primeira marcada como "Fachada" será a capa
+            {photos.length}/{MAX_PHOTOS_PER_PROPERTY} — clique na estrela para definir a capa (usada ao compartilhar)
           </p>
+
         </div>
         <Button
           type="button"
