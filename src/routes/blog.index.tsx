@@ -54,7 +54,7 @@ function BlogIndex() {
                 <div className="p-4">
                   <h2 className="line-clamp-2 font-semibold leading-tight">{p.title}</h2>
                   <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{p.excerpt}</p>
-                  <p className="mt-3 text-xs text-muted-foreground">{formatDateBR(p.published_at ?? p.created_at)} • {readingTime(p.excerpt)} min de leitura</p>
+                  <p className="mt-3 text-xs text-muted-foreground">{formatDateBR(p.published_at ?? p.created_at)} • {readingTime(p.content ?? p.excerpt ?? "")} min de leitura</p>
                 </div>
               </Link>
             ))}

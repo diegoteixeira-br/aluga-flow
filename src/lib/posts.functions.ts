@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type ListInput = { page?: number; pageSize?: number; limit?: number } | undefined;
 
-const LIST_COLS = "id,title,slug,excerpt,cover_image_url,author_name,created_at,published_at,scheduled_at";
+const LIST_COLS = "id,title,slug,excerpt,content,cover_image_url,author_name,created_at,published_at,scheduled_at";
 
 export async function listPublishedPosts(args?: { data?: ListInput } | ListInput) {
   const data: ListInput = (args as any)?.data ?? (args as ListInput) ?? {};
