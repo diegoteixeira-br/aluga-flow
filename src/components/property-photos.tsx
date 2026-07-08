@@ -109,6 +109,29 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setCover = useMutation({
+    mutationFn: async (chosenId: string) => {
+      // Reassign sort_order: chosen becomes 0, others follow in current order.
+      const ordered = [
+        photos.find((p) => p.id === chosenId)!,
+        ...photos.filter((p) => p.id !== chosenId),
+      ].filter(Boolean);
+      await Promise.all(
+        ordered.map((p, i) =>
+          supabase.from("property_photos").update({ sort_order: i }).eq("id", p.id),
+        ),
+      );
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["property-photos", propertyId] });
+      qc.invalidateQueries({ queryKey: ["property-cover"] });
+      qc.invalidateQueries({ queryKey: ["public-listing"] });
+      toast.success("Foto de capa atualizada");
+    },
+    onError: (e: Error) => toast.error(e.message || "Falha ao definir capa"),
+  });
+
+
   return (
     <div className="space-y-3 rounded-md border p-3">
       <div className="flex items-center justify-between">
