@@ -64,8 +64,17 @@ Deno.serve(async (req) => {
       const topic: string = (body?.topic ?? "").toString().trim();
       const count: number = Math.min(Math.max(Number(body?.count ?? 6), 3), 10);
       const currentYear = new Date().getFullYear();
-      const sys = `Você é editor-chefe de um blog imobiliário brasileiro em ${currentYear}. Sugira títulos de artigos ATUAIS, úteis, com foco em SEO, em português do Brasil. NUNCA use anos anteriores a ${currentYear} no título (proibido citar 2023, 2024, 2025 etc.). Se citar ano, use SEMPRE ${currentYear}. Cada título deve ter entre 45 e 80 caracteres, ser específico e atrativo. Responda APENAS com JSON.`;
-      const user = `Gere ${count} sugestões de títulos de artigos sobre o mercado imobiliário brasileiro em ${currentYear}${topic ? ` com foco em: "${topic}"` : ""}. Foque em pautas QUENTES e ATUAIS de ${currentYear}: tendências de mercado neste ano, taxa Selic e financiamento em ${currentYear}, reajuste de aluguel (IGP-M/IPCA) hoje, mudanças recentes na Lei do Inquilinato, garantias locatícias modernas (seguro-fiança, título de capitalização), locação por temporada/Airbnb e nova regulação, LGPD para imobiliárias, uso de IA e automação na gestão de aluguéis, novos produtos de crédito imobiliário, ITBI e tributação atual, golpes em aluguel e como evitar, sustentabilidade e imóveis verdes. Evite temas datados ou notícias de anos anteriores. Retorne JSON: {"titles":[{"title":"...","angle":"breve ângulo"}]}.`;
+      const userAsksYear = /\b(20\d{2}|ano\s+atual|neste\s+ano|este\s+ano)\b/i.test(topic);
+      const sys = `Você é um copywriter profissional e especialista em mercado imobiliário, focado em gatilhos mentais e SEO. Sua tarefa é criar sugestões de títulos magnéticos e persuasivos baseados no tema fornecido.
+
+Regras Estritas:
+
+- PROIBIDO usar o ano atual (ex: ${currentYear}) ou qualquer outro ano nos títulos, a menos que o usuário peça explicitamente.
+- Gere curiosidade: Use formatos como o segredo revelado, o erro comum, a nova regra ignorada, ou como resolver uma grande dor. (Ex: 'O detalhe na vistoria que está custando caro aos proprietários' ou 'A nova mudança silenciosa no IGP-M').
+- Foque na dor ou no desejo: Pense no que tira o sono de quem aluga ou administra imóveis (inadimplência, contratos, impostos, lucro).
+- Não pareça robótico ou excessivamente formal. Seja direto e instigante.
+- Sempre em português do Brasil. Responda APENAS com JSON válido.`;
+      const user = `Gere ${count} sugestões de títulos de artigos sobre o mercado imobiliário brasileiro${topic ? ` com foco em: "${topic}"` : ""}.${userAsksYear ? "" : " Não inclua nenhum ano nos títulos."} Retorne JSON: {"titles":[{"title":"...","angle":"breve ângulo do gatilho mental usado"}]}.`;
       const r = await callAI(key, sys, user, true);
       const parsed = safeJson(r);
       return json({ titles: parsed?.titles ?? [] });
