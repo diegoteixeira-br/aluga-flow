@@ -15,6 +15,8 @@ type Props = {
   subtitle?: string | null;
   fileName?: string;
   className?: string;
+  /** Optional URL sent together with the image so recipients can open the listing/article. */
+  shareUrl?: string;
   /** Which network button to render. Defaults to "instagram". */
   network?: Network;
 };
@@ -23,7 +25,7 @@ type Props = {
  * Renders a hidden 1080x1920 (9:16) story card, converts to JPG via html-to-image
  * and either opens the native share sheet (mobile) or downloads the file (desktop).
  */
-export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "post-alugaflow.jpg", className, network = "instagram" }: Props) {
+export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "post-alugaflow.jpg", className, shareUrl, network = "instagram" }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
 
