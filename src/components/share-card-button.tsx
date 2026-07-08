@@ -15,6 +15,8 @@ type Props = {
   subtitle?: string | null;
   fileName?: string;
   className?: string;
+  /** Optional URL sent together with the image so recipients can open the listing/article. */
+  shareUrl?: string;
   /** Which network button to render. Defaults to "instagram". */
   network?: Network;
 };
@@ -23,7 +25,7 @@ type Props = {
  * Renders a hidden 1080x1920 (9:16) story card, converts to JPG via html-to-image
  * and either opens the native share sheet (mobile) or downloads the file (desktop).
  */
-export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "post-alugaflow.jpg", className, network = "instagram" }: Props) {
+export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "post-alugaflow.jpg", className, shareUrl, network = "instagram" }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -66,9 +68,13 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], fileName, { type: "image/jpeg" });
 
+      const url = shareUrl ?? (typeof window !== "undefined" ? window.location.href : undefined);
+      const shareText = url ? `${title}\n\n${url}` : title;
+
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-      if (nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
-        await nav.share({ files: [file], title, text: title });
+      const payload: ShareData = { files: [file], title, text: shareText, ...(url ? { url } : {}) };
+      if (nav.canShare && nav.canShare(payload) && nav.share) {
+        await nav.share(payload);
       } else {
         const a = document.createElement("a");
         a.href = dataUrl;
@@ -76,7 +82,12 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
         document.body.appendChild(a);
         a.click();
         a.remove();
-        toast.success("Card baixado! Compartilhe no Instagram ou WhatsApp.");
+        if (url && navigator.clipboard) {
+          try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
+          toast.success("Card baixado e link copiado! Cole junto no Instagram/WhatsApp.");
+        } else {
+          toast.success("Card baixado! Compartilhe no Instagram ou WhatsApp.");
+        }
       }
     } catch (e) {
       console.error("[share-card]", e);
