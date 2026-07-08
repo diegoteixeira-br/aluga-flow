@@ -105,12 +105,8 @@ Retorne EXATAMENTE: {"title":"...","slug":"...","excerpt":"...","content":"..."}
       const parsed = safeJson(r);
       if (!parsed?.content) return json({ error: "Falha ao gerar artigo" }, 500);
 
-      const finalTitle = (parsed.title && String(parsed.title).trim().length >= 20)
-        ? String(parsed.title).trim()
-        : title;
-      const finalSlug = parsed.slug && String(parsed.slug).match(/^[a-z0-9-]{3,}$/)
-        ? String(parsed.slug)
-        : slugify(finalTitle);
+      const finalTitle = title;
+      const finalSlug = slugify(finalTitle);
       const finalContent = stripLeadingH1(String(parsed.content));
       const finalExcerpt = String(parsed.excerpt || "").slice(0, 150).trim();
 
