@@ -86,14 +86,19 @@ Regras Estritas:
       const angle: string = (body?.angle ?? "").toString().trim();
       if (!title) return json({ error: "title é obrigatório" }, 400);
       const currentYear = new Date().getFullYear();
-      const sys = `Você é redator especialista em mercado imobiliário brasileiro escrevendo em ${currentYear}. Escreve com clareza, cita leis quando relevante (ex.: Lei 8.245/91), usa exemplos práticos e linguagem acessível ao proprietário independente. Trate o cenário como o atual de ${currentYear} — NUNCA cite anos anteriores (2023, 2024, 2025) como se fossem o presente; se precisar citar ano, use ${currentYear}. Sempre em português do Brasil. Responda APENAS com JSON válido, sem texto fora do JSON.`;
-      const user = `Escreva um artigo de blog completo a partir deste título base: "${title}".${angle ? ` Abordagem: ${angle}.` : ""}
+      const titleMentionsYear = /\b20\d{2}\b/.test(title);
+      const sys = `Você é um redator especialista em mercado imobiliário. Escreva um artigo completo, engajador e otimizado para SEO baseado no título fornecido.
+
+Regra Absoluta: Escreva um conteúdo 'evergreen' (perene). É PROIBIDO mencionar o ano atual (ex: ${currentYear}) no texto${titleMentionsYear ? ", exceto se for imprescindível para a análise pedida no título" : ", a menos que o título exija especificamente uma análise daquele ano"}. Não inicie parágrafos falando sobre o ano.
+
+Foque em dicas práticas, resolução de problemas (dores de locadores e locatários) e use formatação rica (Markdown, H2, H3, bullet points). Escreva sempre em português do Brasil. Responda APENAS com JSON válido, sem texto fora do JSON.`;
+      const user = `Escreva um artigo de blog completo a partir deste título (NÃO altere o título, use-o apenas como referência de tema): "${title}".${angle ? ` Abordagem: ${angle}.` : ""}
 
 Requisitos OBRIGATÓRIOS do JSON de resposta:
-- "title": entre 45 e 80 caracteres, completo, específico e atrativo (você pode polir o título base, mas NUNCA devolver vazio, abreviado ou só uma palavra). NÃO inclua o título dentro do "content".
+- "title": repita EXATAMENTE o título fornecido, sem modificar.
 - "slug": kebab-case, sem acentos, sem pontuação, derivado do title, máx. 70 caracteres.
 - "excerpt": resumo entre 110 e 150 caracteres, atrativo, sem aspas.
-- "content": Markdown SEM título H1 (não comece com "# ..."). Use "## Subtítulo" para seções, "- " para listas e "**negrito**" para destaques. Não use imagens nem links. 6 a 9 seções, 700 a 1100 palavras no total. Inclua uma seção final "## Conclusão" com chamada para ação sutil para proprietários organizarem aluguéis com tecnologia. Evite promessas jurídicas absolutas; oriente a procurar um advogado quando necessário.
+- "content": Markdown SEM título H1 (não comece com "# ..."). Use "## Subtítulo" e "### " para seções, "- " para listas e "**negrito**" para destaques. Não use imagens nem links. 6 a 9 seções, 700 a 1100 palavras no total. Inclua uma seção final "## Conclusão" com chamada para ação sutil para proprietários organizarem aluguéis com tecnologia. Evite promessas jurídicas absolutas; oriente a procurar um advogado quando necessário.
 
 Retorne EXATAMENTE: {"title":"...","slug":"...","excerpt":"...","content":"..."}`;
       const r = await callAI(key, sys, user, true);
