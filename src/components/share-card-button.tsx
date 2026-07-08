@@ -86,8 +86,8 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
     }
   }
 
-  const Icon = network === "facebook" ? Facebook : Instagram;
-  const label = network === "facebook" ? "Facebook" : "Instagram";
+  const Icon = network === "facebook" ? Facebook : network === "instagram" ? Instagram : Share2;
+  const label = network === "facebook" ? "Facebook" : network === "instagram" ? "Instagram" : "Compartilhar";
 
   return (
     <>
