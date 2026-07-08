@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { toJpeg } from "html-to-image";
-import { Loader2, Instagram, Facebook } from "lucide-react";
+import { Loader2, Instagram, Facebook, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import logoSrc from "@/assets/alugaflow-symbol.png";
