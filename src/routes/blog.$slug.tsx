@@ -94,11 +94,6 @@ export const Route = createFileRoute("/blog/$slug")({
 function PostPage() {
   const { post, related } = Route.useLoaderData();
 
-  const share = () => {
-    const url = typeof window !== "undefined" ? window.location.href : "";
-    const text = `${post.title} — ${url}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  };
   const copy = async () => {
     if (typeof window === "undefined") return;
     await navigator.clipboard.writeText(window.location.href);
