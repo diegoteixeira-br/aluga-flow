@@ -123,22 +123,14 @@ function PostPage() {
 
 
         <div className="mt-8 flex flex-wrap gap-2 border-t pt-6">
-          <Button variant="outline" size="sm" onClick={share}><Share2 className="mr-2 h-4 w-4" /> WhatsApp</Button>
+          <ShareCardButton
+            network="share"
+            title={post.title}
+            imageUrl={post.cover_image_url}
+            subtitle={post.excerpt ?? undefined}
+            fileName="post-alugaflow.jpg"
+          />
           <Button variant="outline" size="sm" onClick={copy}><LinkIcon className="mr-2 h-4 w-4" /> Copiar link</Button>
-          <ShareCardButton
-            network="instagram"
-            title={post.title}
-            imageUrl={post.cover_image_url}
-            subtitle={post.excerpt ?? undefined}
-            fileName="post-alugaflow.jpg"
-          />
-          <ShareCardButton
-            network="facebook"
-            title={post.title}
-            imageUrl={post.cover_image_url}
-            subtitle={post.excerpt ?? undefined}
-            fileName="post-alugaflow.jpg"
-          />
         </div>
 
         <BlogEngagement postId={post.id} />
