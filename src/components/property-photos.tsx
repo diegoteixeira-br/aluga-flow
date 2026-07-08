@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Trash2, Upload, ImageIcon } from "lucide-react";
+import { Trash2, Upload, ImageIcon, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -109,14 +109,38 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setCover = useMutation({
+    mutationFn: async (chosenId: string) => {
+      // Reassign sort_order: chosen becomes 0, others follow in current order.
+      const ordered = [
+        photos.find((p) => p.id === chosenId)!,
+        ...photos.filter((p) => p.id !== chosenId),
+      ].filter(Boolean);
+      await Promise.all(
+        ordered.map((p, i) =>
+          supabase.from("property_photos").update({ sort_order: i }).eq("id", p.id),
+        ),
+      );
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["property-photos", propertyId] });
+      qc.invalidateQueries({ queryKey: ["property-cover"] });
+      qc.invalidateQueries({ queryKey: ["public-listing"] });
+      toast.success("Foto de capa atualizada");
+    },
+    onError: (e: Error) => toast.error(e.message || "Falha ao definir capa"),
+  });
+
+
   return (
     <div className="space-y-3 rounded-md border p-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-medium text-sm">Fotos do imóvel</p>
           <p className="text-xs text-muted-foreground">
-            {photos.length}/{MAX_PHOTOS_PER_PROPERTY} — primeira marcada como "Fachada" será a capa
+            {photos.length}/{MAX_PHOTOS_PER_PROPERTY} — clique na estrela para definir a capa (usada ao compartilhar)
           </p>
+
         </div>
         <Button
           type="button"
@@ -159,7 +183,9 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {photos.map((p) => (
+          {photos.map((p, idx) => {
+            const isCover = idx === 0;
+            return (
             <div key={p.id} className="space-y-1">
               <div className="relative aspect-square overflow-hidden rounded-md border bg-muted">
                 {urls[p.storage_path] ? (
@@ -167,6 +193,22 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
                 ) : (
                   <div className="grid h-full place-items-center text-xs text-muted-foreground">...</div>
                 )}
+                {isCover && (
+                  <span className="absolute left-1 top-1 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                    Capa
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant={isCover ? "default" : "secondary"}
+                  className="absolute left-1 bottom-1 h-7 w-7"
+                  title={isCover ? "Foto de capa atual" : "Definir como capa"}
+                  disabled={isCover || setCover.isPending}
+                  onClick={() => setCover.mutate(p.id)}
+                >
+                  <Star className={`h-3.5 w-3.5 ${isCover ? "fill-current" : ""}`} />
+                </Button>
                 <Button
                   type="button"
                   size="icon"
@@ -186,7 +228,8 @@ export function PropertyPhotos({ propertyId }: { propertyId: string }) {
                 </SelectContent>
               </Select>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -9,11 +9,12 @@ export function PropertyCover({ propertyId, className = "h-12 w-16" }: { propert
     queryFn: async () => {
       const { data, error } = await supabase
         .from("property_photos")
-        .select("storage_path,category,created_at")
+        .select("storage_path,category,sort_order,created_at")
         .eq("property_id", propertyId)
+        .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       if (error) throw error;
-      const cover = data.find((p) => p.category === "fachada") ?? data[0];
+      const cover = data[0] ?? null;
       if (!cover) return null;
       const urls = await getSignedUrls([cover.storage_path]);
       return urls[cover.storage_path] ?? null;
