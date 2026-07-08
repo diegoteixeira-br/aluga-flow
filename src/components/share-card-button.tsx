@@ -68,9 +68,13 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], fileName, { type: "image/jpeg" });
 
+      const url = shareUrl ?? (typeof window !== "undefined" ? window.location.href : undefined);
+      const shareText = url ? `${title}\n\n${url}` : title;
+
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-      if (nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
-        await nav.share({ files: [file], title, text: title });
+      const payload: ShareData = { files: [file], title, text: shareText, ...(url ? { url } : {}) };
+      if (nav.canShare && nav.canShare(payload) && nav.share) {
+        await nav.share(payload);
       } else {
         const a = document.createElement("a");
         a.href = dataUrl;
@@ -78,7 +82,12 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
         document.body.appendChild(a);
         a.click();
         a.remove();
-        toast.success("Card baixado! Compartilhe no Instagram ou WhatsApp.");
+        if (url && navigator.clipboard) {
+          try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
+          toast.success("Card baixado e link copiado! Cole junto no Instagram/WhatsApp.");
+        } else {
+          toast.success("Card baixado! Compartilhe no Instagram ou WhatsApp.");
+        }
       }
     } catch (e) {
       console.error("[share-card]", e);
