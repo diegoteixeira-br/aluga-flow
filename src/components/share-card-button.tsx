@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import logoSrc from "@/assets/alugaflow-symbol.png";
 import { formatBRL } from "@/lib/format";
 
-type Network = "instagram" | "facebook";
+type Network = "instagram" | "facebook" | "share";
 
 type Props = {
   title: string;
