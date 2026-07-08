@@ -206,19 +206,10 @@ function AnuncioDetail() {
                 <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
                   Preencha seu pré-cadastro (dados pessoais e documentos) para o proprietário avaliar e adiantar o contrato.
                 </p>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3">
                   <ShareCardButton
-                    className="flex-1"
-                    network="instagram"
-                    title={prop.ad_title ?? prop.nickname ?? "Imóvel"}
-                    imageUrl={photos[0]?.fullUrl ?? photos[0]?.url ?? null}
-                    price={prop.rent_amount}
-                    subtitle={[prop.neighborhood, prop.city, prop.state].filter(Boolean).join(", ")}
-                    fileName="post-alugaflow.jpg"
-                  />
-                  <ShareCardButton
-                    className="flex-1"
-                    network="facebook"
+                    className="w-full"
+                    network="share"
                     title={prop.ad_title ?? prop.nickname ?? "Imóvel"}
                     imageUrl={photos[0]?.fullUrl ?? photos[0]?.url ?? null}
                     price={prop.rent_amount}
