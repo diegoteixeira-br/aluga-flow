@@ -194,16 +194,16 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
     notes: state.notes,
   }), [state, selectedProperty, selectedTenant]);
 
+  // Texto final do contrato (tokens resolvidos com os dados do wizard).
+  const resolvedText = useMemo(() => {
+    if (!ownerProfile) return editorText;
+    const values = buildTokenValues(contractPayload, ownerProfile);
+    return resolveTokens(editorText, values);
+  }, [editorText, contractPayload, ownerProfile]);
+
   function previewPDF() {
-    if (!ownerProfile) return;
-    const name = selectedProperty?.nickname ?? "contrato";
-    if (templateId === "completo_20") {
-      gerarContratoLocacaoCompleto(contractPayload, ownerProfile).save(`contrato-${name.replace(/\s+/g, "-").toLowerCase()}.pdf`);
-    } else if (templateId === "residencial_20") {
-      gerarContratoResidencial(contractPayload, ownerProfile).save(`contrato-${name.replace(/\s+/g, "-").toLowerCase()}.pdf`);
-    } else {
-      downloadContractPDF(name, contractPayload, ownerProfile);
-    }
+    const slug = (selectedProperty?.nickname ?? "contrato").replace(/\s+/g, "-").toLowerCase();
+    downloadTextPDF(resolvedText, `contrato-${slug}`);
   }
 
   // Save contract (creates payments via existing buildMonthlyPayments logic inline)
