@@ -69,10 +69,13 @@ export function ShareCardButton({ title, imageUrl, price, subtitle, fileName = "
       const file = new File([blob], fileName, { type: "image/jpeg" });
 
       const url = shareUrl ?? (typeof window !== "undefined" ? window.location.href : undefined);
-      const shareText = url ? `${title}\n\n${url}` : title;
 
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-      const payload: ShareData = { files: [file], title, text: shareText, ...(url ? { url } : {}) };
+      // WhatsApp/Instagram concatenate `text` + `url`; passing both duplicates the link.
+      // Send only `url` (with `title`) so the link appears once.
+      const payload: ShareData = url
+        ? { files: [file], title, url }
+        : { files: [file], title, text: title };
       if (nav.canShare && nav.canShare(payload) && nav.share) {
         await nav.share(payload);
       } else {
