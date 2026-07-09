@@ -327,9 +327,10 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
       if (templateId === "completo_20") doc = gerarContratoLocacaoCompleto(contractPayload, ownerProfile);
       else if (templateId === "residencial_20") doc = gerarContratoResidencial(contractPayload, ownerProfile);
       else {
-        const { buildContractPDF } = await import("@/lib/contract-pdf");
-        doc = buildContractPDF(contractPayload, ownerProfile);
+        const { generateContractPDF } = await import("@/lib/contract-pdf");
+        doc = generateContractPDF(name, contractPayload, ownerProfile);
       }
+
       const dataUri: string = doc.output("datauristring");
       const pdfBase64 = dataUri.split(",")[1] ?? dataUri;
 
