@@ -317,16 +317,8 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
   async function finishElectronic() {
     if (!ownerProfile) { toast.error("Perfil do proprietário não carregado"); return; }
     try {
-      // Gera PDF em base64
-
-      let doc;
-      if (templateId === "completo_20") doc = gerarContratoLocacaoCompleto(contractPayload, ownerProfile);
-      else if (templateId === "residencial_20") doc = gerarContratoResidencial(contractPayload, ownerProfile);
-      else {
-        const { generateContractPDF } = await import("@/lib/contract-pdf");
-        doc = generateContractPDF(contractPayload, ownerProfile);
-      }
-
+      // Gera PDF em base64 a partir do texto resolvido do modelo dinâmico
+      const doc = renderTextToPDF(resolvedText, `contrato-${(selectedProperty?.nickname ?? "contrato").replace(/\s+/g, "-").toLowerCase()}`);
       const dataUri: string = doc.output("datauristring");
       const pdfBase64 = dataUri.split(",")[1] ?? dataUri;
 
