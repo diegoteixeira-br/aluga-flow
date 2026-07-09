@@ -53,11 +53,19 @@ async function handleEvent(event: StripeEvent, admin: any) {
 
   if (event.type === "checkout.session.completed") {
     const meta = (obj.metadata ?? {}) as Record<string, string>;
+
+    // Fluxo: taxa de assinatura eletrônica (plano free)
+    if (meta.type === "esign_fee" && meta.contract_id) {
+      await handleEsignFeePaid(admin, meta.contract_id);
+      return;
+    }
+
     const userId = meta.user_id;
     const planType = meta.plan_type;
     const subId = obj.subscription as string | undefined;
     const customerId = obj.customer as string | undefined;
     if (!userId || !planType) return;
+
 
     let periodStart: string | null = null;
     let periodEnd: string | null = null;
