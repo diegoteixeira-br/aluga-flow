@@ -79,7 +79,7 @@ function addMonths(iso: string, months: number): string {
 export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenChange: (b: boolean) => void }) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>(initialState);
-  const [templateId, setTemplateId] = useState<TemplateId>("editor_dinamico");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [editorText, setEditorText] = useState<string>(TEMPLATE_LOCACAO_DINAMICO);
   const [createdContractId, setCreatedContractId] = useState<string | null>(null);
   const [signatureLinks, setSignatureLinks] = useState<Array<{ role: string; name: string; email: string; url: string }>>([]);
@@ -87,7 +87,7 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
 
   useEffect(() => {
     if (open) {
-      setStep(0); setState(initialState); setTemplateId("editor_dinamico");
+      setStep(0); setState(initialState); setSelectedTemplateId(null);
       setEditorText(TEMPLATE_LOCACAO_DINAMICO);
       setCreatedContractId(null); setSignatureLinks([]);
     }
