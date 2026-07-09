@@ -78,6 +78,8 @@ function ContractsPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [distratoFor, setDistratoFor] = useState<Contract | null>(null);
+  const [attachFor, setAttachFor] = useState<Contract | null>(null);
+
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["contracts"],
