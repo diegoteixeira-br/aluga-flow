@@ -293,8 +293,7 @@ function TemplateEditorDialog({
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-import { useRef } from "react";
+
 
 const SAMPLE_VALUES: Record<string, string> = {
   data_assinatura: "01/01/2026",
