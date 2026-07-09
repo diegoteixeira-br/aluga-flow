@@ -29,6 +29,7 @@ const navItems = [
   { to: "/properties", label: "Imóveis", icon: Building2 },
   { to: "/tenants", label: "Inquilinos", icon: Users },
   { to: "/contracts", label: "Contratos", icon: FileText },
+  { to: "/modelos-contrato", label: "Modelos de Contrato", icon: FileCode2 },
   { to: "/payments", label: "Pagamentos", icon: Wallet },
   { to: "/expenses", label: "Despesas", icon: Receipt },
   { to: "/vistoria", label: "Vistoria", icon: ClipboardCheck },
