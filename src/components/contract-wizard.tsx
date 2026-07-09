@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCover } from "@/components/property-cover";
-import { downloadContractPDF, type ContractPDFData, type OwnerProfile, type ExtraCharge } from "@/lib/contract-pdf";
+import { type ContractPDFData, type OwnerProfile, type ExtraCharge } from "@/lib/contract-pdf";
 import { TEMPLATE_LOCACAO_DINAMICO, buildTokenValues, resolveTokens } from "@/lib/contract-tokens";
 import { downloadTextPDF, renderTextToPDF } from "@/lib/contract-pdf-text";
 import { listTemplatesForProperty, type ContractTemplate } from "@/lib/contract-templates-store";
