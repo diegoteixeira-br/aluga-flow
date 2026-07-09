@@ -15,21 +15,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCover } from "@/components/property-cover";
-import { downloadContractPDF, type ContractPDFData, type OwnerProfile, type ExtraCharge } from "@/lib/contract-pdf";
-import { gerarContratoResidencial, gerarContratoLocacaoCompleto } from "@/lib/contract-templates";
-import { TEMPLATE_LOCACAO_DINAMICO } from "@/lib/contract-tokens";
+import { type ContractPDFData, type OwnerProfile, type ExtraCharge } from "@/lib/contract-pdf";
+import { TEMPLATE_LOCACAO_DINAMICO, buildTokenValues, resolveTokens } from "@/lib/contract-tokens";
+import { downloadTextPDF, renderTextToPDF } from "@/lib/contract-pdf-text";
+import { listTemplatesForProperty, type ContractTemplate } from "@/lib/contract-templates-store";
 import { ContractEditor } from "@/components/contract-editor";
 import { formatBRL, formatDate } from "@/lib/format";
 import { createSignatureInvites } from "@/lib/signatures.functions";
 import { createAsaasChargesForContract } from "@/lib/asaas.functions";
 
-type TemplateId = "editor_dinamico" | "padrao_11" | "completo_20" | "residencial_20";
-const TEMPLATES: Array<{ id: TemplateId; label: string; desc: string }> = [
-  { id: "editor_dinamico", label: "Editor com campos dinâmicos", desc: "Edite o texto livremente, insira variáveis [token] e pré-visualize com os dados preenchidos." },
-  { id: "padrao_11", label: "Padrão (11 cláusulas, Lei 8.245/91)", desc: "Modelo enxuto, cobre obrigações essenciais." },
-  { id: "completo_20", label: "Locação completo (20 cláusulas) — Residencial/Comercial", desc: "Modelo robusto com LGPD, sinistros, sublocação, alienação e foro." },
-  { id: "residencial_20", label: "Locação Residencial (20 cláusulas)", desc: "Modelo específico residencial com cláusulas estendidas." },
-];
+
+
 
 const STEPS = ["Imóvel", "Detalhes", "Participantes", "Garantia", "Documento", "Assinatura"] as const;
 
@@ -83,7 +79,7 @@ function addMonths(iso: string, months: number): string {
 export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenChange: (b: boolean) => void }) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>(initialState);
-  const [templateId, setTemplateId] = useState<TemplateId>("editor_dinamico");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [editorText, setEditorText] = useState<string>(TEMPLATE_LOCACAO_DINAMICO);
   const [createdContractId, setCreatedContractId] = useState<string | null>(null);
   const [signatureLinks, setSignatureLinks] = useState<Array<{ role: string; name: string; email: string; url: string }>>([]);
@@ -91,7 +87,7 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
 
   useEffect(() => {
     if (open) {
-      setStep(0); setState(initialState); setTemplateId("editor_dinamico");
+      setStep(0); setState(initialState); setSelectedTemplateId(null);
       setEditorText(TEMPLATE_LOCACAO_DINAMICO);
       setCreatedContractId(null); setSignatureLinks([]);
     }
@@ -198,16 +194,16 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
     notes: state.notes,
   }), [state, selectedProperty, selectedTenant]);
 
+  // Texto final do contrato (tokens resolvidos com os dados do wizard).
+  const resolvedText = useMemo(() => {
+    if (!ownerProfile) return editorText;
+    const values = buildTokenValues(contractPayload, ownerProfile);
+    return resolveTokens(editorText, values);
+  }, [editorText, contractPayload, ownerProfile]);
+
   function previewPDF() {
-    if (!ownerProfile) return;
-    const name = selectedProperty?.nickname ?? "contrato";
-    if (templateId === "completo_20") {
-      gerarContratoLocacaoCompleto(contractPayload, ownerProfile).save(`contrato-${name.replace(/\s+/g, "-").toLowerCase()}.pdf`);
-    } else if (templateId === "residencial_20") {
-      gerarContratoResidencial(contractPayload, ownerProfile).save(`contrato-${name.replace(/\s+/g, "-").toLowerCase()}.pdf`);
-    } else {
-      downloadContractPDF(name, contractPayload, ownerProfile);
-    }
+    const slug = (selectedProperty?.nickname ?? "contrato").replace(/\s+/g, "-").toLowerCase();
+    downloadTextPDF(resolvedText, `contrato-${slug}`);
   }
 
   // Save contract (creates payments via existing buildMonthlyPayments logic inline)
@@ -321,16 +317,8 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
   async function finishElectronic() {
     if (!ownerProfile) { toast.error("Perfil do proprietário não carregado"); return; }
     try {
-      // Gera PDF em base64
-
-      let doc;
-      if (templateId === "completo_20") doc = gerarContratoLocacaoCompleto(contractPayload, ownerProfile);
-      else if (templateId === "residencial_20") doc = gerarContratoResidencial(contractPayload, ownerProfile);
-      else {
-        const { generateContractPDF } = await import("@/lib/contract-pdf");
-        doc = generateContractPDF(contractPayload, ownerProfile);
-      }
-
+      // Gera PDF em base64 a partir do texto resolvido do modelo dinâmico
+      const doc = renderTextToPDF(resolvedText, `contrato-${(selectedProperty?.nickname ?? "contrato").replace(/\s+/g, "-").toLowerCase()}`);
       const dataUri: string = doc.output("datauristring");
       const pdfBase64 = dataUri.split(",")[1] ?? dataUri;
 
@@ -411,7 +399,7 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
           {step === 1 && <StepDetails state={state} patch={patch} />}
           {step === 2 && <StepParticipants state={state} patch={patch} tenants={tenants} owner={ownerProfile ?? null} />}
           {step === 3 && <StepGuarantee state={state} patch={patch} />}
-          {step === 4 && <StepDocument payload={contractPayload} owner={ownerProfile ?? null} onPreview={previewPDF} templateId={templateId} onTemplateChange={setTemplateId} editorText={editorText} onEditorTextChange={setEditorText} />}
+          {step === 4 && <StepDocument payload={contractPayload} owner={ownerProfile ?? null} onPreview={previewPDF} propertyId={state.property_id} selectedTemplateId={selectedTemplateId} onSelectTemplate={(id, content) => { setSelectedTemplateId(id); if (content !== null) setEditorText(content); }} editorText={editorText} onEditorTextChange={setEditorText} />}
           {step === 5 && (
             <StepSignature
               state={state}
@@ -663,55 +651,75 @@ function StepGuarantee({ state, patch }: { state: WizardState; patch: <K extends
 }
 
 function StepDocument({
-  payload, owner, onPreview, templateId, onTemplateChange, editorText, onEditorTextChange,
+  payload, owner, onPreview, propertyId, selectedTemplateId, onSelectTemplate, editorText, onEditorTextChange,
 }: {
   payload: ContractPDFData;
   owner: OwnerProfile | null;
   onPreview: () => void;
-  templateId: TemplateId;
-  onTemplateChange: (id: TemplateId) => void;
+  propertyId: string;
+  selectedTemplateId: string | null;
+  onSelectTemplate: (id: string | null, content: string | null) => void;
   editorText: string;
   onEditorTextChange: (v: string) => void;
 }) {
-  const tpl = TEMPLATES.find((t) => t.id === templateId);
+  const { data: templates = [], isLoading } = useQuery({
+    queryKey: ["contract_templates", "wizard", propertyId || null],
+    queryFn: () => listTemplatesForProperty(propertyId || null),
+  });
+
+  // Auto-selecionar o modelo padrão do usuário na primeira carga
+  useEffect(() => {
+    if (selectedTemplateId !== null || templates.length === 0) return;
+    const def = templates.find((t) => t.is_default);
+    if (def) onSelectTemplate(def.id, def.content);
+  }, [templates, selectedTemplateId, onSelectTemplate]);
+
+  const selected: ContractTemplate | undefined = templates.find((t) => t.id === selectedTemplateId);
+
+  function handleChange(value: string) {
+    if (value === "__blank__") {
+      onSelectTemplate(null, TEMPLATE_LOCACAO_DINAMICO);
+      return;
+    }
+    const t = templates.find((x) => x.id === value);
+    if (t) onSelectTemplate(t.id, t.content);
+  }
+
   return (
     <div className="space-y-4">
       <h3 className="font-semibold">Documento</h3>
-      <p className="text-sm text-muted-foreground">Escolha o modelo de contrato. As variáveis serão preenchidas automaticamente com os dados das etapas anteriores.</p>
+      <p className="text-sm text-muted-foreground">
+        Escolha um dos seus modelos salvos. As variáveis <code className="rounded bg-muted px-1 text-[11px]">[nome_da_variavel]</code> são preenchidas automaticamente. Você ainda pode ajustar o texto para este contrato específico sem alterar o modelo salvo.
+      </p>
 
       <div className="space-y-2">
         <Label>Modelo de contrato</Label>
-        <Select value={templateId} onValueChange={(v) => onTemplateChange(v as TemplateId)}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+        <Select value={selectedTemplateId ?? "__blank__"} onValueChange={handleChange}>
+          <SelectTrigger>
+            <SelectValue placeholder={isLoading ? "Carregando…" : "Selecione um modelo"} />
+          </SelectTrigger>
           <SelectContent>
-            {TEMPLATES.map((t) => (
-              <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+            <SelectItem value="__blank__">Editor em branco (modelo padrão)</SelectItem>
+            {templates.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}{t.is_default ? " ★" : ""}{t.property_id ? " • específico" : ""}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {tpl && <p className="text-xs text-muted-foreground">{tpl.desc}</p>}
+        {selected?.description && <p className="text-xs text-muted-foreground">{selected.description}</p>}
+        {templates.length === 0 && !isLoading && (
+          <p className="text-xs text-muted-foreground">
+            Você ainda não tem modelos salvos. Crie em <b>Modelos de Contrato</b> no menu lateral — o editor abaixo já traz um modelo padrão.
+          </p>
+        )}
       </div>
 
-      {templateId === "editor_dinamico" ? (
-        <ContractEditor payload={payload} owner={owner} value={editorText} onChange={onEditorTextChange} />
-      ) : (
-        <>
-          <Card><CardContent className="p-4 text-sm space-y-1">
-            <p><b>Imóvel:</b> {payload.property?.nickname} — {payload.property?.address}</p>
-            <p><b>Inquilino:</b> {payload.tenant?.full_name}</p>
-            {payload.guarantor?.name && <p><b>Fiador:</b> {payload.guarantor.name}</p>}
-            <p><b>Vigência:</b> {formatDate(payload.start_date)} a {formatDate(payload.end_date)}</p>
-            <p><b>Aluguel:</b> {formatBRL(payload.rent_amount)} — venc. dia {payload.due_day}</p>
-            {payload.extra_charges && payload.extra_charges.length > 0 && (
-              <p><b>Cobranças extras:</b> {payload.extra_charges.map((e) => `${e.label} (${formatBRL(e.amount)})`).join(", ")}</p>
-            )}
-            <p><b>Garantia:</b> {payload.guarantee_type}</p>
-          </CardContent></Card>
-          <Button type="button" variant="outline" onClick={onPreview}>
-            <FileDown className="h-4 w-4" /> Visualizar PDF
-          </Button>
-        </>
-      )}
+      <ContractEditor payload={payload} owner={owner} value={editorText} onChange={onEditorTextChange} />
+
+      <Button type="button" variant="outline" onClick={onPreview}>
+        <FileDown className="h-4 w-4" /> Visualizar PDF final
+      </Button>
     </div>
   );
 }

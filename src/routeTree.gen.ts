@@ -29,6 +29,7 @@ import { Route as AuthenticatedTenantsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
+import { Route as AuthenticatedModelosContratoRouteImport } from './routes/_authenticated/modelos-contrato'
 import { Route as AuthenticatedMeusAnunciosRouteImport } from './routes/_authenticated/meus-anuncios'
 import { Route as AuthenticatedExpensesRouteImport } from './routes/_authenticated/expenses'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -144,6 +145,12 @@ const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedModelosContratoRoute =
+  AuthenticatedModelosContratoRouteImport.update({
+    id: '/modelos-contrato',
+    path: '/modelos-contrato',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMeusAnunciosRoute =
   AuthenticatedMeusAnunciosRouteImport.update({
     id: '/meus-anuncios',
@@ -245,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/expenses': typeof AuthenticatedExpensesRoute
   '/meus-anuncios': typeof AuthenticatedMeusAnunciosRoute
+  '/modelos-contrato': typeof AuthenticatedModelosContratoRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/properties': typeof AuthenticatedPropertiesRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -278,6 +286,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/expenses': typeof AuthenticatedExpensesRoute
   '/meus-anuncios': typeof AuthenticatedMeusAnunciosRoute
+  '/modelos-contrato': typeof AuthenticatedModelosContratoRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/properties': typeof AuthenticatedPropertiesRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -316,6 +325,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/expenses': typeof AuthenticatedExpensesRoute
   '/_authenticated/meus-anuncios': typeof AuthenticatedMeusAnunciosRoute
+  '/_authenticated/modelos-contrato': typeof AuthenticatedModelosContratoRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/properties': typeof AuthenticatedPropertiesRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/expenses'
     | '/meus-anuncios'
+    | '/modelos-contrato'
     | '/payments'
     | '/properties'
     | '/relatorios'
@@ -387,6 +398,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/expenses'
     | '/meus-anuncios'
+    | '/modelos-contrato'
     | '/payments'
     | '/properties'
     | '/relatorios'
@@ -424,6 +436,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/expenses'
     | '/_authenticated/meus-anuncios'
+    | '/_authenticated/modelos-contrato'
     | '/_authenticated/payments'
     | '/_authenticated/properties'
     | '/_authenticated/relatorios'
@@ -601,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/modelos-contrato': {
+      id: '/_authenticated/modelos-contrato'
+      path: '/modelos-contrato'
+      fullPath: '/modelos-contrato'
+      preLoaderRoute: typeof AuthenticatedModelosContratoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/meus-anuncios': {
       id: '/_authenticated/meus-anuncios'
       path: '/meus-anuncios'
@@ -741,6 +761,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedExpensesRoute: typeof AuthenticatedExpensesRoute
   AuthenticatedMeusAnunciosRoute: typeof AuthenticatedMeusAnunciosRoute
+  AuthenticatedModelosContratoRoute: typeof AuthenticatedModelosContratoRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
@@ -756,6 +777,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedExpensesRoute: AuthenticatedExpensesRoute,
   AuthenticatedMeusAnunciosRoute: AuthenticatedMeusAnunciosRoute,
+  AuthenticatedModelosContratoRoute: AuthenticatedModelosContratoRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
@@ -809,13 +831,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
