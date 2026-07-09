@@ -190,6 +190,8 @@ export type Database = {
           adjustment_index: Database["public"]["Enums"]["adjustment_index"]
           contract_type: string
           created_at: string
+          d4sign_document_id: string | null
+          d4sign_status: string | null
           deposit_amount: number | null
           due_day: number
           end_date: string
@@ -207,12 +209,16 @@ export type Database = {
           payment_method: string
           property_id: string
           rent_amount: number
+          signature_fee_amount: number | null
+          signature_fee_status: string | null
           signature_mode: string
           signature_status: string
           signed_at: string | null
           signed_pdf_path: string | null
           start_date: string
           status: Database["public"]["Enums"]["contract_status"]
+          stripe_checkout_session_id: string | null
+          stripe_invoice_item_id: string | null
           tenant_id: string
           updated_at: string
           user_id: string
@@ -222,6 +228,8 @@ export type Database = {
           adjustment_index?: Database["public"]["Enums"]["adjustment_index"]
           contract_type?: string
           created_at?: string
+          d4sign_document_id?: string | null
+          d4sign_status?: string | null
           deposit_amount?: number | null
           due_day?: number
           end_date: string
@@ -239,12 +247,16 @@ export type Database = {
           payment_method?: string
           property_id: string
           rent_amount: number
+          signature_fee_amount?: number | null
+          signature_fee_status?: string | null
           signature_mode?: string
           signature_status?: string
           signed_at?: string | null
           signed_pdf_path?: string | null
           start_date: string
           status?: Database["public"]["Enums"]["contract_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_invoice_item_id?: string | null
           tenant_id: string
           updated_at?: string
           user_id: string
@@ -254,6 +266,8 @@ export type Database = {
           adjustment_index?: Database["public"]["Enums"]["adjustment_index"]
           contract_type?: string
           created_at?: string
+          d4sign_document_id?: string | null
+          d4sign_status?: string | null
           deposit_amount?: number | null
           due_day?: number
           end_date?: string
@@ -271,12 +285,16 @@ export type Database = {
           payment_method?: string
           property_id?: string
           rent_amount?: number
+          signature_fee_amount?: number | null
+          signature_fee_status?: string | null
           signature_mode?: string
           signature_status?: string
           signed_at?: string | null
           signed_pdf_path?: string | null
           start_date?: string
           status?: Database["public"]["Enums"]["contract_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_invoice_item_id?: string | null
           tenant_id?: string
           updated_at?: string
           user_id?: string
@@ -1275,6 +1293,8 @@ export type Database = {
         | "cancelado"
         | "pendente"
         | "aguardando_assinatura_fisica"
+        | "aguardando_pagamento"
+        | "processando_assinatura"
       expense_category:
         | "manutencao"
         | "iptu"
@@ -1458,6 +1478,8 @@ export const Constants = {
         "cancelado",
         "pendente",
         "aguardando_assinatura_fisica",
+        "aguardando_pagamento",
+        "processando_assinatura",
       ],
       expense_category: [
         "manutencao",
