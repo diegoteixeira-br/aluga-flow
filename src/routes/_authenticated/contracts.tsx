@@ -338,3 +338,65 @@ function DistratoDialog({
     </Dialog>
   );
 }
+
+function AttachSignedDialog({ contract, onClose, onSuccess }: { contract: Contract; onClose: () => void; onSuccess: () => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function submit() {
+    if (!file) { toast.error("Selecione o PDF assinado"); return; }
+    if (file.type !== "application/pdf") { toast.error("O arquivo deve ser um PDF"); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error("PDF muito grande (máx. 20 MB)"); return; }
+    setLoading(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Sessão expirada");
+      const path = `${u.user.id}/${contract.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`;
+      const { error: upErr } = await supabase.storage.from("signed-contracts").upload(path, file, {
+        contentType: "application/pdf", upsert: false,
+      });
+      if (upErr) throw upErr;
+
+      const { data, error } = await supabase.functions.invoke("activate-contract", {
+        body: { contractId: contract.id, signedPdfPath: path },
+      });
+      if (error) throw new Error(error.message || "Falha ao ativar contrato");
+      if (data && (data as { error?: string }).error) throw new Error((data as { error: string }).error);
+
+      toast.success("Contrato ativado — email de confirmação enviado");
+      onSuccess();
+      onClose();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally { setLoading(false); }
+  }
+
+  return (
+    <Dialog open onOpenChange={(b) => !b && !loading && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>Anexar contrato assinado</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div className="rounded-md bg-muted/40 p-3 text-sm">
+            <p><b>Contrato:</b> {contract.property?.nickname} · {contract.tenant?.full_name}</p>
+            <p className="text-muted-foreground text-xs mt-1">
+              Ao enviar o PDF assinado, o contrato será marcado como <b>Ativo</b>, as cobranças serão geradas e um email de confirmação será enviado.
+            </p>
+          </div>
+          <div className="space-y-1">
+            <Label>Arquivo PDF assinado</Label>
+            <Input ref={inputRef} type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            {file && <p className="text-xs text-muted-foreground">{file.name} · {(file.size / 1024).toFixed(0)} KB</p>}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>
+          <Button onClick={submit} disabled={loading || !file}>
+            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Enviando…</> : <><Upload className="h-4 w-4" /> Anexar e ativar</>}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
