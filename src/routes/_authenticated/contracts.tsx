@@ -200,9 +200,14 @@ function ContractsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap">
                           <Button size="icon" variant="ghost" title="Ver contrato PDF" onClick={() => downloadPDF(c)}><FileDown className="h-4 w-4" /></Button>
-                          <Button size="icon" variant="ghost" title="Gerar cobranças ASAAS" onClick={() => sendCharges.mutate(c.id)} disabled={sendCharges.isPending}><Send className="h-4 w-4" /></Button>
+                          {c.status === "aguardando_assinatura_fisica" && (
+                            <Button size="sm" variant="outline" className="h-8" title="Anexar contrato assinado" onClick={() => setAttachFor(c)}>
+                              <Upload className="h-3 w-3" /> Anexar assinado
+                            </Button>
+                          )}
+                          <Button size="icon" variant="ghost" title="Gerar cobranças ASAAS" onClick={() => sendCharges.mutate(c.id)} disabled={sendCharges.isPending || c.status !== "ativo"}><Send className="h-4 w-4" /></Button>
                           {isActive && (
                             <Button size="icon" variant="ghost" title="Gerar distrato" onClick={() => setDistratoFor(c)}><FileMinus className="h-4 w-4" /></Button>
                           )}
@@ -217,6 +222,7 @@ function ContractsPage() {
                           </AlertDialog>
                         </div>
                       </TableCell>
+
                     </TableRow>
                   );
                 })}
