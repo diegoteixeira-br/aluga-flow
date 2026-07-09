@@ -322,7 +322,7 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
     if (!ownerProfile) { toast.error("Perfil do proprietário não carregado"); return; }
     try {
       // Gera PDF em base64
-      const name = selectedProperty?.nickname ?? "contrato";
+
       let doc;
       if (templateId === "completo_20") doc = gerarContratoLocacaoCompleto(contractPayload, ownerProfile);
       else if (templateId === "residencial_20") doc = gerarContratoResidencial(contractPayload, ownerProfile);
