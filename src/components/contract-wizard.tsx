@@ -319,9 +319,69 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
   }
 
   async function finishElectronic() {
-    const r = await saveContract.mutateAsync();
-    await sendInvites.mutateAsync(r.id);
+    if (!ownerProfile) { toast.error("Perfil do proprietário não carregado"); return; }
+    try {
+      // Gera PDF em base64
+      const name = selectedProperty?.nickname ?? "contrato";
+      let doc;
+      if (templateId === "completo_20") doc = gerarContratoLocacaoCompleto(contractPayload, ownerProfile);
+      else if (templateId === "residencial_20") doc = gerarContratoResidencial(contractPayload, ownerProfile);
+      else {
+        const { buildContractPDF } = await import("@/lib/contract-pdf");
+        doc = buildContractPDF(contractPayload, ownerProfile);
+      }
+      const dataUri: string = doc.output("datauristring");
+      const pdfBase64 = dataUri.split(",")[1] ?? dataUri;
+
+      const contractInsert = {
+        property_id: state.property_id,
+        tenant_id: state.tenant_id,
+        start_date: state.start_date,
+        end_date: state.end_date,
+        rent_amount: state.rent_amount,
+        due_day: state.due_day,
+        deposit_amount: state.deposit_amount ?? 0,
+        adjustment_index: state.adjustment_index,
+        adjustment_frequency_months: state.adjustment_frequency_months,
+        guarantee_type: state.guarantee_type,
+        guarantee_months: state.guarantee_type === "caucao" ? state.guarantee_months : null,
+        contract_type: state.contract_type,
+        extra_charges: state.extra_charges,
+        guarantor_name: state.add_guarantor ? state.guarantor_name : null,
+        guarantor_cpf: state.add_guarantor ? state.guarantor_cpf : null,
+        guarantor_rg: state.add_guarantor ? state.guarantor_rg : null,
+        guarantor_email: state.add_guarantor ? state.guarantor_email : null,
+        guarantor_phone: state.add_guarantor ? state.guarantor_phone : null,
+        guarantor_address: state.add_guarantor ? state.guarantor_address : null,
+        payment_method: state.payment_method,
+        notes: state.notes || null,
+      };
+
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const { data, error } = await supabase.functions.invoke("contract-esign", {
+        body: { contract: contractInsert, pdfBase64, origin },
+      });
+      if (error) throw new Error(error.message || "Falha ao iniciar assinatura eletrônica");
+      const res = data as { ok?: boolean; error?: string; mode?: "free" | "paid"; checkoutUrl?: string; contractId?: string };
+      if (res?.error) throw new Error(res.error);
+
+      qc.invalidateQueries({ queryKey: ["contracts"] });
+
+      if (res.mode === "free" && res.checkoutUrl) {
+        toast.success("Redirecionando para pagamento da taxa (R$ 19,90)…");
+        window.location.href = res.checkoutUrl;
+        return;
+      }
+      if (res.mode === "paid") {
+        toast.success("Taxa adicionada à sua próxima fatura. Contrato enviado ao D4Sign.");
+        onOpenChange(false);
+        return;
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
