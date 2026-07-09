@@ -91,9 +91,10 @@ async function handleEsignFeePaid(admin: any, contractId: string) {
   }
 }
 
-
+async function handleEvent(event: StripeEvent, admin: any) {
   const obj = event.data.object as Record<string, any>;
   const STRIPE = Deno.env.get("STRIPE_SECRET_KEY");
+
 
   if (event.type === "checkout.session.completed") {
     const meta = (obj.metadata ?? {}) as Record<string, string>;
