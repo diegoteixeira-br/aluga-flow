@@ -17,3 +17,7 @@ verify_jwt = false
 
 [functions.email-cron]
 verify_jwt = false
+
+[functions.d4sign-webhook]
+verify_jwt = false
+
