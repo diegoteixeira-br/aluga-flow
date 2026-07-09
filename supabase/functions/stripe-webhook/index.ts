@@ -47,7 +47,51 @@ async function verifyStripeSig(payload: string, header: string | null, secret: s
   return timingSafeEq(toHex(sig), v1);
 }
 
-async function handleEvent(event: StripeEvent, admin: any) {
+async function handleEsignFeePaid(admin: any, contractId: string) {
+  const { data: contract } = await admin.from("contracts")
+    .select("id, user_id, tenant_id, status, signed_pdf_path, guarantor_email")
+    .eq("id", contractId).maybeSingle();
+  if (!contract) { console.error("[esign_fee] contrato não encontrado", contractId); return; }
+  if (contract.status !== "aguardando_pagamento") return;
+
+  await admin.from("contracts").update({ signature_fee_status: "pago" }).eq("id", contractId);
+
+  const { data: tenant } = await admin.from("tenants").select("email").eq("id", contract.tenant_id).maybeSingle();
+  const { data: ownerUser } = await admin.auth.admin.getUserById(contract.user_id).catch(() => ({ data: null } as any));
+  const ownerEmail = ownerUser?.user?.email as string | undefined;
+  if (!tenant?.email || !ownerEmail || !contract.signed_pdf_path) {
+    console.error("[esign_fee] dados incompletos para D4Sign", { contractId });
+    return;
+  }
+
+  // Baixa PDF original do storage
+  const { data: file, error: dlErr } = await admin.storage.from("signed-contracts").download(contract.signed_pdf_path);
+  if (dlErr || !file) { console.error("[esign_fee] PDF não encontrado", dlErr); return; }
+  const pdfBytes = new Uint8Array(await file.arrayBuffer());
+
+  const signers: D4Signer[] = [
+    { email: ownerEmail, act: "1" },
+    { email: tenant.email, act: "1" },
+  ];
+  if (contract.guarantor_email) signers.push({ email: String(contract.guarantor_email), act: "1" });
+
+  try {
+    const up = await d4UploadPdf(`contrato-${contractId}.pdf`, pdfBytes);
+    await d4CreateSignerList(up.uuid, signers);
+    await d4SendToSign(up.uuid, { message: "Segue o contrato de locação para assinatura eletrônica." });
+    await admin.from("contracts").update({
+      status: "processando_assinatura",
+      d4sign_document_id: up.uuid,
+      d4sign_status: "enviado",
+    }).eq("id", contractId);
+  } catch (e) {
+    const msg = (e as Error).message;
+    console.error("[esign_fee] D4Sign fail:", msg);
+    await admin.from("contracts").update({ d4sign_status: `erro: ${msg}`.slice(0, 200) }).eq("id", contractId);
+  }
+}
+
+
   const obj = event.data.object as Record<string, any>;
   const STRIPE = Deno.env.get("STRIPE_SECRET_KEY");
 
