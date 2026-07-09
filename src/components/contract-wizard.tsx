@@ -399,7 +399,7 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
           {step === 1 && <StepDetails state={state} patch={patch} />}
           {step === 2 && <StepParticipants state={state} patch={patch} tenants={tenants} owner={ownerProfile ?? null} />}
           {step === 3 && <StepGuarantee state={state} patch={patch} />}
-          {step === 4 && <StepDocument payload={contractPayload} owner={ownerProfile ?? null} onPreview={previewPDF} templateId={templateId} onTemplateChange={setTemplateId} editorText={editorText} onEditorTextChange={setEditorText} />}
+          {step === 4 && <StepDocument payload={contractPayload} owner={ownerProfile ?? null} onPreview={previewPDF} propertyId={state.property_id} selectedTemplateId={selectedTemplateId} onSelectTemplate={(id, content) => { setSelectedTemplateId(id); if (content !== null) setEditorText(content); }} editorText={editorText} onEditorTextChange={setEditorText} />}
           {step === 5 && (
             <StepSignature
               state={state}
