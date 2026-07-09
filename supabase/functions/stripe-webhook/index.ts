@@ -3,6 +3,7 @@
 // Público (verify_jwt = false). Valida assinatura HMAC do Stripe.
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { d4UploadPdf, d4CreateSignerList, d4SendToSign, type D4Signer } from "../_shared/d4sign.ts";
 
 type StripeEvent = {
   id: string;
