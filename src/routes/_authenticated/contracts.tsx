@@ -241,9 +241,20 @@ function ContractsPage() {
           toPayload={toPayload}
         />
       )}
+      {attachFor && (
+        <AttachSignedDialog
+          contract={attachFor}
+          onClose={() => setAttachFor(null)}
+          onSuccess={() => {
+            qc.invalidateQueries({ queryKey: ["contracts"] });
+            qc.invalidateQueries({ queryKey: ["payments"] });
+          }}
+        />
+      )}
     </div>
   );
 }
+
 
 function DistratoDialog({
   contract, onClose, loadOwner, toPayload,
