@@ -1269,7 +1269,12 @@ export type Database = {
     Enums: {
       adjustment_index: "nenhum" | "igpm" | "ipca"
       app_role: "admin" | "user"
-      contract_status: "ativo" | "encerrado" | "cancelado" | "pendente"
+      contract_status:
+        | "ativo"
+        | "encerrado"
+        | "cancelado"
+        | "pendente"
+        | "aguardando_assinatura_fisica"
       expense_category:
         | "manutencao"
         | "iptu"
@@ -1447,7 +1452,13 @@ export const Constants = {
     Enums: {
       adjustment_index: ["nenhum", "igpm", "ipca"],
       app_role: ["admin", "user"],
-      contract_status: ["ativo", "encerrado", "cancelado", "pendente"],
+      contract_status: [
+        "ativo",
+        "encerrado",
+        "cancelado",
+        "pendente",
+        "aguardando_assinatura_fisica",
+      ],
       expense_category: [
         "manutencao",
         "iptu",
