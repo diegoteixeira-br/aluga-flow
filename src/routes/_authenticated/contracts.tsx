@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Trash2, FileDown, Send, ShieldCheck, FileMinus } from "lucide-react";
+import { Plus, Trash2, FileDown, Send, ShieldCheck, FileMinus, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
 import { createAsaasChargesForContract } from "@/lib/asaas.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
