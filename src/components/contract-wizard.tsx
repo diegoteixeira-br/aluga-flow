@@ -24,13 +24,8 @@ import { formatBRL, formatDate } from "@/lib/format";
 import { createSignatureInvites } from "@/lib/signatures.functions";
 import { createAsaasChargesForContract } from "@/lib/asaas.functions";
 
-type TemplateId = "editor_dinamico" | "padrao_11" | "completo_20" | "residencial_20";
-const TEMPLATES: Array<{ id: TemplateId; label: string; desc: string }> = [
-  { id: "editor_dinamico", label: "Editor com campos dinâmicos", desc: "Edite o texto livremente, insira variáveis [token] e pré-visualize com os dados preenchidos." },
-  { id: "padrao_11", label: "Padrão (11 cláusulas, Lei 8.245/91)", desc: "Modelo enxuto, cobre obrigações essenciais." },
-  { id: "completo_20", label: "Locação completo (20 cláusulas) — Residencial/Comercial", desc: "Modelo robusto com LGPD, sinistros, sublocação, alienação e foro." },
-  { id: "residencial_20", label: "Locação Residencial (20 cláusulas)", desc: "Modelo específico residencial com cláusulas estendidas." },
-];
+
+
 
 const STEPS = ["Imóvel", "Detalhes", "Participantes", "Garantia", "Documento", "Assinatura"] as const;
 
