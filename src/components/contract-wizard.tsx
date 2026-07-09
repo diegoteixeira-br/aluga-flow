@@ -328,7 +328,7 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
       else if (templateId === "residencial_20") doc = gerarContratoResidencial(contractPayload, ownerProfile);
       else {
         const { generateContractPDF } = await import("@/lib/contract-pdf");
-        doc = generateContractPDF(name, contractPayload, ownerProfile);
+        doc = generateContractPDF(contractPayload, ownerProfile);
       }
 
       const dataUri: string = doc.output("datauristring");
