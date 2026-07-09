@@ -43,6 +43,8 @@ type Contract = Omit<ContractPDFData, "guarantor"> & {
 };
 
 function displayStatus(c: Contract) {
+  if (c.status === "aguardando_assinatura_fisica")
+    return { label: "Aguardando assinatura físico", className: "bg-amber-600 hover:bg-amber-600 text-white" };
   if (c.signature_status === "assinado" && c.signature_mode === "eletronica")
     return { label: "Assinado digitalmente", className: "bg-blue-600 hover:bg-blue-600 text-white" };
   if (c.signature_status === "assinado")
@@ -57,6 +59,7 @@ function displayStatus(c: Contract) {
   if (days <= 30) return { label: "A vencer em 30 dias", className: "bg-orange-500 hover:bg-orange-500 text-white" };
   return { label: "Ativo", className: "bg-green-600 hover:bg-green-600 text-white" };
 }
+
 
 function monthsBetween(s: string, e: string): number {
   const a = new Date(s + "T00:00:00"), b = new Date(e + "T00:00:00");
