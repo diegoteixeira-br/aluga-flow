@@ -151,8 +151,7 @@ function TemplateEditorDialog({
   const [isDefault, setIsDefault] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  // Reset when opening
-  useMemo(() => {
+  useEffect(() => {
     if (open) {
       setName(editing?.name ?? "");
       setDescription(editing?.description ?? "");
