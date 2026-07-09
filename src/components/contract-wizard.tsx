@@ -224,7 +224,7 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
         rent_amount: state.rent_amount,
         due_day: state.due_day,
         deposit_amount: state.deposit_amount ?? 0,
-        status: "ativo" as const,
+        status: (state.signature_mode === "manual" ? "aguardando_assinatura_fisica" : "ativo") as "ativo" | "aguardando_assinatura_fisica",
         adjustment_index: state.adjustment_index,
         adjustment_frequency_months: state.adjustment_frequency_months,
         guarantee_type: state.guarantee_type,
@@ -245,6 +245,11 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
       const { data: ins, error } = await supabase.from("contracts").insert(payload).select("id").single();
       if (error) throw error;
 
+      // Contratos manuais só geram pagamentos/cobranças após anexo do PDF assinado (ativação).
+      if (state.signature_mode === "manual") {
+        return { id: ins.id, count: 0, asaasCreated: 0, asaasFailed: 0, asaasErr: "", manual: true };
+      }
+
       // payments
       const payments = buildMonthlyPayments({
         contract_id: ins.id, user_id: u.user.id,
@@ -261,18 +266,23 @@ export function ContractWizard({ open, onOpenChange }: { open: boolean; onOpenCh
           asaasCreated = r.created; asaasFailed = r.failed; asaasErr = r.errors.join(" | ");
         } catch (e) { asaasErr = (e as Error).message; asaasFailed = payments.length; }
       }
-      return { id: ins.id, count: payments.length, asaasCreated, asaasFailed, asaasErr };
+      return { id: ins.id, count: payments.length, asaasCreated, asaasFailed, asaasErr, manual: false };
     },
     onSuccess: (r) => {
       setCreatedContractId(r.id);
       qc.invalidateQueries({ queryKey: ["contracts"] });
       qc.invalidateQueries({ queryKey: ["payments"] });
-      toast.success(`Contrato criado — ${r.count} pagamentos gerados`);
-      if (r.asaasCreated > 0) toast.success(`${r.asaasCreated} cobrança(s) criadas no ASAAS`);
-      if (r.asaasFailed > 0) toast.error(`ASAAS: ${r.asaasFailed} falha(s) — ${r.asaasErr}`);
+      if (r.manual) {
+        toast.success("Contrato criado — aguardando assinatura física. Anexe o PDF assinado para ativá-lo.");
+      } else {
+        toast.success(`Contrato criado — ${r.count} pagamentos gerados`);
+        if (r.asaasCreated > 0) toast.success(`${r.asaasCreated} cobrança(s) criadas no ASAAS`);
+        if (r.asaasFailed > 0) toast.error(`ASAAS: ${r.asaasFailed} falha(s) — ${r.asaasErr}`);
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   // Send electronic signature invites
   const sendInvites = useMutation({

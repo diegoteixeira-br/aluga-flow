@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Trash2, FileDown, Send, ShieldCheck, FileMinus } from "lucide-react";
+import { Plus, Trash2, FileDown, Send, ShieldCheck, FileMinus, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
 import { createAsaasChargesForContract } from "@/lib/asaas.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,8 @@ type Contract = Omit<ContractPDFData, "guarantor"> & {
 };
 
 function displayStatus(c: Contract) {
+  if (c.status === "aguardando_assinatura_fisica")
+    return { label: "Aguardando assinatura físico", className: "bg-amber-600 hover:bg-amber-600 text-white" };
   if (c.signature_status === "assinado" && c.signature_mode === "eletronica")
     return { label: "Assinado digitalmente", className: "bg-blue-600 hover:bg-blue-600 text-white" };
   if (c.signature_status === "assinado")
@@ -56,6 +59,7 @@ function displayStatus(c: Contract) {
   if (days <= 30) return { label: "A vencer em 30 dias", className: "bg-orange-500 hover:bg-orange-500 text-white" };
   return { label: "Ativo", className: "bg-green-600 hover:bg-green-600 text-white" };
 }
+
 
 function monthsBetween(s: string, e: string): number {
   const a = new Date(s + "T00:00:00"), b = new Date(e + "T00:00:00");
@@ -74,6 +78,8 @@ function ContractsPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [distratoFor, setDistratoFor] = useState<Contract | null>(null);
+  const [attachFor, setAttachFor] = useState<Contract | null>(null);
+
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["contracts"],
@@ -194,9 +200,14 @@ function ContractsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap">
                           <Button size="icon" variant="ghost" title="Ver contrato PDF" onClick={() => downloadPDF(c)}><FileDown className="h-4 w-4" /></Button>
-                          <Button size="icon" variant="ghost" title="Gerar cobranças ASAAS" onClick={() => sendCharges.mutate(c.id)} disabled={sendCharges.isPending}><Send className="h-4 w-4" /></Button>
+                          {c.status === "aguardando_assinatura_fisica" && (
+                            <Button size="sm" variant="outline" className="h-8" title="Anexar contrato assinado" onClick={() => setAttachFor(c)}>
+                              <Upload className="h-3 w-3" /> Anexar assinado
+                            </Button>
+                          )}
+                          <Button size="icon" variant="ghost" title="Gerar cobranças ASAAS" onClick={() => sendCharges.mutate(c.id)} disabled={sendCharges.isPending || c.status !== "ativo"}><Send className="h-4 w-4" /></Button>
                           {isActive && (
                             <Button size="icon" variant="ghost" title="Gerar distrato" onClick={() => setDistratoFor(c)}><FileMinus className="h-4 w-4" /></Button>
                           )}
@@ -211,6 +222,7 @@ function ContractsPage() {
                           </AlertDialog>
                         </div>
                       </TableCell>
+
                     </TableRow>
                   );
                 })}
@@ -229,9 +241,20 @@ function ContractsPage() {
           toPayload={toPayload}
         />
       )}
+      {attachFor && (
+        <AttachSignedDialog
+          contract={attachFor}
+          onClose={() => setAttachFor(null)}
+          onSuccess={() => {
+            qc.invalidateQueries({ queryKey: ["contracts"] });
+            qc.invalidateQueries({ queryKey: ["payments"] });
+          }}
+        />
+      )}
     </div>
   );
 }
+
 
 function DistratoDialog({
   contract, onClose, loadOwner, toPayload,
@@ -315,3 +338,65 @@ function DistratoDialog({
     </Dialog>
   );
 }
+
+function AttachSignedDialog({ contract, onClose, onSuccess }: { contract: Contract; onClose: () => void; onSuccess: () => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function submit() {
+    if (!file) { toast.error("Selecione o PDF assinado"); return; }
+    if (file.type !== "application/pdf") { toast.error("O arquivo deve ser um PDF"); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error("PDF muito grande (máx. 20 MB)"); return; }
+    setLoading(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Sessão expirada");
+      const path = `${u.user.id}/${contract.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`;
+      const { error: upErr } = await supabase.storage.from("signed-contracts").upload(path, file, {
+        contentType: "application/pdf", upsert: false,
+      });
+      if (upErr) throw upErr;
+
+      const { data, error } = await supabase.functions.invoke("activate-contract", {
+        body: { contractId: contract.id, signedPdfPath: path },
+      });
+      if (error) throw new Error(error.message || "Falha ao ativar contrato");
+      if (data && (data as { error?: string }).error) throw new Error((data as { error: string }).error);
+
+      toast.success("Contrato ativado — email de confirmação enviado");
+      onSuccess();
+      onClose();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally { setLoading(false); }
+  }
+
+  return (
+    <Dialog open onOpenChange={(b) => !b && !loading && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>Anexar contrato assinado</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div className="rounded-md bg-muted/40 p-3 text-sm">
+            <p><b>Contrato:</b> {contract.property?.nickname} · {contract.tenant?.full_name}</p>
+            <p className="text-muted-foreground text-xs mt-1">
+              Ao enviar o PDF assinado, o contrato será marcado como <b>Ativo</b>, as cobranças serão geradas e um email de confirmação será enviado.
+            </p>
+          </div>
+          <div className="space-y-1">
+            <Label>Arquivo PDF assinado</Label>
+            <Input ref={inputRef} type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            {file && <p className="text-xs text-muted-foreground">{file.name} · {(file.size / 1024).toFixed(0)} KB</p>}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>
+          <Button onClick={submit} disabled={loading || !file}>
+            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Enviando…</> : <><Upload className="h-4 w-4" /> Anexar e ativar</>}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
