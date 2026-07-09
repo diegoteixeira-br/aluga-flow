@@ -651,55 +651,75 @@ function StepGuarantee({ state, patch }: { state: WizardState; patch: <K extends
 }
 
 function StepDocument({
-  payload, owner, onPreview, templateId, onTemplateChange, editorText, onEditorTextChange,
+  payload, owner, onPreview, propertyId, selectedTemplateId, onSelectTemplate, editorText, onEditorTextChange,
 }: {
   payload: ContractPDFData;
   owner: OwnerProfile | null;
   onPreview: () => void;
-  templateId: TemplateId;
-  onTemplateChange: (id: TemplateId) => void;
+  propertyId: string;
+  selectedTemplateId: string | null;
+  onSelectTemplate: (id: string | null, content: string | null) => void;
   editorText: string;
   onEditorTextChange: (v: string) => void;
 }) {
-  const tpl = TEMPLATES.find((t) => t.id === templateId);
+  const { data: templates = [], isLoading } = useQuery({
+    queryKey: ["contract_templates", "wizard", propertyId || null],
+    queryFn: () => listTemplatesForProperty(propertyId || null),
+  });
+
+  // Auto-selecionar o modelo padrão do usuário na primeira carga
+  useEffect(() => {
+    if (selectedTemplateId !== null || templates.length === 0) return;
+    const def = templates.find((t) => t.is_default);
+    if (def) onSelectTemplate(def.id, def.content);
+  }, [templates, selectedTemplateId, onSelectTemplate]);
+
+  const selected: ContractTemplate | undefined = templates.find((t) => t.id === selectedTemplateId);
+
+  function handleChange(value: string) {
+    if (value === "__blank__") {
+      onSelectTemplate(null, TEMPLATE_LOCACAO_DINAMICO);
+      return;
+    }
+    const t = templates.find((x) => x.id === value);
+    if (t) onSelectTemplate(t.id, t.content);
+  }
+
   return (
     <div className="space-y-4">
       <h3 className="font-semibold">Documento</h3>
-      <p className="text-sm text-muted-foreground">Escolha o modelo de contrato. As variáveis serão preenchidas automaticamente com os dados das etapas anteriores.</p>
+      <p className="text-sm text-muted-foreground">
+        Escolha um dos seus modelos salvos. As variáveis <code className="rounded bg-muted px-1 text-[11px]">[nome_da_variavel]</code> são preenchidas automaticamente. Você ainda pode ajustar o texto para este contrato específico sem alterar o modelo salvo.
+      </p>
 
       <div className="space-y-2">
         <Label>Modelo de contrato</Label>
-        <Select value={templateId} onValueChange={(v) => onTemplateChange(v as TemplateId)}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+        <Select value={selectedTemplateId ?? "__blank__"} onValueChange={handleChange}>
+          <SelectTrigger>
+            <SelectValue placeholder={isLoading ? "Carregando…" : "Selecione um modelo"} />
+          </SelectTrigger>
           <SelectContent>
-            {TEMPLATES.map((t) => (
-              <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+            <SelectItem value="__blank__">Editor em branco (modelo padrão)</SelectItem>
+            {templates.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}{t.is_default ? " ★" : ""}{t.property_id ? " • específico" : ""}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {tpl && <p className="text-xs text-muted-foreground">{tpl.desc}</p>}
+        {selected?.description && <p className="text-xs text-muted-foreground">{selected.description}</p>}
+        {templates.length === 0 && !isLoading && (
+          <p className="text-xs text-muted-foreground">
+            Você ainda não tem modelos salvos. Crie em <b>Modelos de Contrato</b> no menu lateral — o editor abaixo já traz um modelo padrão.
+          </p>
+        )}
       </div>
 
-      {templateId === "editor_dinamico" ? (
-        <ContractEditor payload={payload} owner={owner} value={editorText} onChange={onEditorTextChange} />
-      ) : (
-        <>
-          <Card><CardContent className="p-4 text-sm space-y-1">
-            <p><b>Imóvel:</b> {payload.property?.nickname} — {payload.property?.address}</p>
-            <p><b>Inquilino:</b> {payload.tenant?.full_name}</p>
-            {payload.guarantor?.name && <p><b>Fiador:</b> {payload.guarantor.name}</p>}
-            <p><b>Vigência:</b> {formatDate(payload.start_date)} a {formatDate(payload.end_date)}</p>
-            <p><b>Aluguel:</b> {formatBRL(payload.rent_amount)} — venc. dia {payload.due_day}</p>
-            {payload.extra_charges && payload.extra_charges.length > 0 && (
-              <p><b>Cobranças extras:</b> {payload.extra_charges.map((e) => `${e.label} (${formatBRL(e.amount)})`).join(", ")}</p>
-            )}
-            <p><b>Garantia:</b> {payload.guarantee_type}</p>
-          </CardContent></Card>
-          <Button type="button" variant="outline" onClick={onPreview}>
-            <FileDown className="h-4 w-4" /> Visualizar PDF
-          </Button>
-        </>
-      )}
+      <ContractEditor payload={payload} owner={owner} value={editorText} onChange={onEditorTextChange} />
+
+      <Button type="button" variant="outline" onClick={onPreview}>
+        <FileDown className="h-4 w-4" /> Visualizar PDF final
+      </Button>
     </div>
   );
 }
